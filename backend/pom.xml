@@ -21,6 +21,11 @@
     <bucket4j.version>8.21.0</bucket4j.version>
     <wiremock.version>3.13.2</wiremock.version>
     <spotless.version>3.10.4</spotless.version>
+    <!-- Patch overrides of Boot 4.1.1's managed versions for HIGH/CRITICAL CVEs (Trivy, 2026-10-19).
+         Drop them when the Boot parent moves past these. -->
+    <tomcat.version>11.0.27</tomcat.version>
+    <jackson-bom.version>3.1.8</jackson-bom.version>
+    <jackson-2-bom.version>2.21.8</jackson-2-bom.version>
   </properties>
 
   <dependencies>

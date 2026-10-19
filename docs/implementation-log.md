@@ -46,6 +46,13 @@ Only results that were actually executed are marked ✓. Legend: `[✓]` done an
 | SEC-040, QA-SEC-15 | `scripts/ci/bundle-secret-check.sh` |
 | NFR-013 | `scripts/ci/no-live-llm-guard.sh` |
 | §11 no deployment | `scripts/ci/no-deploy-guard.sh` |
+| NFR-006, QA-SEC-12 | `scripts/ci/log-secret-scan.sh` on Compose logs after the E2E run |
+
+## Dependency security (2026-10-19)
+
+Trivy (HIGH/CRITICAL, fixed only) flagged Boot 4.1.1's managed Tomcat 11.0.24 and Jackson 2.21.5 /
+3.1.5. `backend/pom.xml` overrides `tomcat.version` 11.0.27, `jackson-bom.version` 3.1.8 and
+`jackson-2-bom.version` 2.21.8 until a Boot patch release includes them.
 
 ## Fixes found by E2E (2026-10-19)
 
@@ -55,6 +62,8 @@ Only results that were actually executed are marked ✓. Legend: `[✓]` done an
 
 ## Known gaps
 
-- QA-SEC-12 (log scan after a full run) is not automated yet.
 - QA-PERF-01 and QA-RAG-EVAL are manual by design and have not been run.
 - Gemini adapter (P2) not implemented.
+- Seed realism: every currently open task is created within the last 30 days, so a 30-day burndown
+  starts at 0 h and rises. The chart is correct for that data; spreading open-task creation dates in
+  `scripts/seed.py` would give a more typical demo curve.

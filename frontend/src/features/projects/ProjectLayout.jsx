@@ -1,5 +1,5 @@
-import { createContext, useContext } from 'react';
-import { NavLink, Outlet, useParams } from 'react-router';
+import { createContext, useContext, useEffect, useRef } from 'react';
+import { NavLink, Outlet, useLocation, useParams } from 'react-router';
 import { useQuery } from '@tanstack/react-query';
 import { Archive, BarChart3, Gauge, KanbanSquare, MessagesSquare, Settings } from 'lucide-react';
 import { projects } from '../../api/endpoints.js';
@@ -21,7 +21,13 @@ const TABS = [
 /** Loads the project once for every project page and renders the glass project tab bar. */
 export function ProjectLayout() {
   const { key } = useParams();
+  const { pathname } = useLocation();
+  const tabsRef = useRef(null);
   const q = useQuery({ queryKey: ['project', key], queryFn: () => projects.get(key) });
+  // On phones the tab strip scrolls sideways: keep the current tab in view.
+  useEffect(() => {
+    tabsRef.current?.querySelector('a.active')?.scrollIntoView({ block: 'nearest', inline: 'nearest' });
+  }, [pathname, q.isSuccess]);
   if (q.isError && q.error?.response?.status === 404) return <NotFoundPage what="project" />;
   if (q.isError)
     return <ErrorNotice error={q.error} onRetry={q.refetch} title="Couldn't load this project" />;
@@ -46,7 +52,7 @@ export function ProjectLayout() {
               <Skeleton width={260} height={36} />
             )}
           </div>
-          <nav aria-label="Project" className="project-tabs clay-inset">
+          <nav aria-label="Project" className="project-tabs clay-inset" ref={tabsRef}>
             {TABS.map(({ to, label, icon: Icon }) => (
               <NavLink key={to} to={to}>
                 <Icon aria-hidden="true" />

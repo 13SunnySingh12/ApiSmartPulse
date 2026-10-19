@@ -93,7 +93,8 @@ E2E_PASSWORD=<SEED_DEMO_PASSWORD> npx playwright test
 (fails on any deploy/publish/registry step or live LLM use), backend format + tests + OpenAPI
 contract diff, AI service ruff/mypy/pytest against Postgres, frontend Prettier/ESLint/Stylelint/
 Vitest/build + bundle secret check, Trivy/pip-audit/npm audit, local Docker image builds (never
-pushed) and, for PRs/nightly/manual runs, Playwright E2E against the Compose stack. No secrets are
+pushed) and, for PRs/nightly/manual runs, Playwright E2E against the Compose stack followed by a
+scan of the service logs for leaked secrets. No secrets are
 needed: CI generates throwaway ones per run.
 
 ## Troubleshooting

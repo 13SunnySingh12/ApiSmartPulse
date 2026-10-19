@@ -768,6 +768,16 @@ select.input {
   border-collapse: collapse;
 }
 
+/* Wide tables scroll inside their panel instead of widening the page. */
+.panel:has(> .table) {
+  overflow-x: auto;
+}
+
+/* A select in a cell keeps room for its longest option ("Manager"). */
+.table select.input {
+  min-width: 8.5rem;
+}
+
 .table th {
   padding: var(--space-3) var(--space-4);
   font: var(--type-small);
