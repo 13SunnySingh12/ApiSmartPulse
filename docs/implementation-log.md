@@ -17,7 +17,7 @@ Only results that were actually executed are marked ✓. Legend: `[✓]` done an
 | [✓] | Docker images (backend, AI with CPU torch, frontend nginx non-root) | Built locally; nothing pushed |
 | [✓] | CI workflow, Dependabot, guards (no-deploy, no-live-LLM, bundle secrets) | Guards run locally; no-deploy guard fails on an injected `docker push` |
 | [✓] | Playwright E2E (QA-E2E-01..08) + axe scans (QA-A11Y-01) | 10/10 passing locally against the CI Compose stack (mock LLM, fake embeddings); zero serious/critical axe issues on 10 pages, light and dark |
-| [→] | CI on GitHub | First run: guard + AI service green; fixed Prettier on e2e files, an order-dependent outbox test and Trivy's Maven 429s (scan now uses the pre-resolved local repo, offline) |
+| [✓] | CI on GitHub | Run 39239981142 (manual dispatch, `main`): guard, backend, AI service, frontend, security (Trivy/pip-audit/npm audit), Docker builds and E2E incl. log secret scan all green |
 | [ ] | QA-RAG-EVAL (needs a real Groq key, manual) | — |
 | [ ] | QA-PERF-01 k6 smoke (manual, optional) | — |
 | [!] | Optional: `GROQ_API_KEY` for live answers | Owner action; app works without it |
@@ -59,6 +59,16 @@ Trivy (HIGH/CRITICAL, fixed only) flagged Boot 4.1.1's managed Tomcat 11.0.24 an
 - Task drawer "More actions" menu sat under the drawer scrim, so mouse clicks were swallowed: menus now stack above dialogs.
 - Board moves were announced twice (board live region + toast live region): board region removed.
 - Account button's accessible name didn't include its visible text (WCAG 2.5.3): the visible name is now the label, kept visually hidden on mobile.
+
+## Impeccable audit (2026-10-19, report only)
+
+Detector: 0 findings in `frontend/src`. Axe: 0 serious/critical on 10 pages in both themes.
+Remaining P2/P3 notes, not fixed:
+- P2 Responsive: small icon buttons (card drag handle and "More actions", toast dismiss) are 32 px.
+  That passes WCAG 2.2 AA target size (24 px) but is below the 44 px touch guideline. Neighbouring
+  targets make a safe hit-area expansion a design decision.
+- P3 Motion: `prefers-reduced-motion` shortens every transition to 1 ms globally. State changes stay
+  visible, but there is no tailored alternative per component.
 
 ## Known gaps
 
