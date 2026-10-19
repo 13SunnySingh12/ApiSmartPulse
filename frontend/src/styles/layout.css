@@ -230,8 +230,14 @@
     display: none;
   }
 
+  /* Hidden visually only: the name stays the account button's accessible name (WCAG 2.5.3). */
   .topbar__name {
-    display: none;
+    position: absolute;
+    width: 1px;
+    height: 1px;
+    overflow: hidden;
+    clip-path: inset(50%);
+    white-space: nowrap;
   }
 }
 

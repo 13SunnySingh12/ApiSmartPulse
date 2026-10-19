@@ -22,14 +22,13 @@ export function useColumn(projectKey, status, filters) {
 }
 
 /** Status change shared by drag-and-drop, the "Move to…" menu and the task detail. */
-export function useMoveTask(projectKey, announce) {
+export function useMoveTask(projectKey) {
   const qc = useQueryClient();
   const toast = useToast();
   return useMutation({
     mutationFn: ({ task, status, actualHours }) =>
       tasks.setStatus(task.key, { status, version: task.version, ...(actualHours ? { actualHours } : {}) }),
     onSuccess: (updated) => {
-      announce?.(`${updated.key} moved to ${statusLabel(updated.status)}`);
       toast.success(`${updated.key} moved to ${statusLabel(updated.status)}`);
       qc.setQueryData(['task', updated.key], updated);
     },
@@ -43,7 +42,6 @@ export function useMoveTask(projectKey, announce) {
       } else {
         toast.error(p.detail || 'Could not move the task.', { requestId: p.requestId });
       }
-      announce?.(`${task.key} was not moved`);
     },
     onSettled: () => {
       qc.invalidateQueries({ queryKey: ['tasks', projectKey] });

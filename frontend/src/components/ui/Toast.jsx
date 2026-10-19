@@ -47,7 +47,7 @@ export function ToastProvider({ children }) {
           .map((t) => t.message)
           .join('. ')}
       </div>
-      <ul className="toasts">
+      <ul className="toasts" aria-label="Notifications">
         {toasts.map((t) => {
           const Icon = ICONS[t.kind];
           return (

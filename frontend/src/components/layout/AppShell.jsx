@@ -105,7 +105,7 @@ export function AppShell() {
             <Menu
               label="Account"
               trigger={
-                <button type="button" className="topbar__user" aria-label={`Account menu for ${user?.name}`}>
+                <button type="button" className="topbar__user">
                   <Avatar name={user?.name} size="lg" />
                   <span className="topbar__name">{user?.name}</span>
                 </button>

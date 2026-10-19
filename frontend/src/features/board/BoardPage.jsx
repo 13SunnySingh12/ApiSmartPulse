@@ -38,9 +38,8 @@ export function BoardPage() {
   const debouncedSearch = useDebounced(search, 300);
   const effective = { ...filters, q: debouncedSearch };
   const [creating, setCreating] = useState(false);
-  const [announcement, setAnnouncement] = useState('');
   const [finishing, setFinishing] = useState(null);
-  const move = useMoveTask(project.key, setAnnouncement);
+  const move = useMoveTask(project.key);
   const columns = {
     TODO: useColumn(project.key, 'TODO', effective),
     IN_PROGRESS: useColumn(project.key, 'IN_PROGRESS', effective),
@@ -241,9 +240,6 @@ export function BoardPage() {
         </DndContext>
       )}
 
-      <p className="visually-hidden" aria-live="polite">
-        {announcement}
-      </p>
       {creating && (
         <NewTaskDialog
           open={creating}

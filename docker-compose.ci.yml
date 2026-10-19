@@ -5,6 +5,7 @@ services:
     environment:
       LLM_PROVIDER: mock
       LOGIN_RATE_PER_MINUTE: "300" # E2E logs in many times from one runner IP
+      AI_USER_LIMIT_PER_10MIN: "200" # E2E retries Ask/split as one manager
   ai-service:
     build:
       args: { INSTALL_ML_EXTRAS: "false" }

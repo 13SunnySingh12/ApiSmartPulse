@@ -544,7 +544,8 @@ select.input {
 }
 
 .menu {
-  z-index: var(--z-overlay);
+  /* Menus open from inside dialogs and drawers, so they stack above them. */
+  z-index: calc(var(--z-dialog) + 1);
   min-width: 200px;
   padding: var(--space-2);
   border-radius: var(--radius-lg);

@@ -16,8 +16,8 @@ Only results that were actually executed are marked ✓. Legend: `[✓]` done an
 | [✓] | Frontend: design system (tokens, glass/clay materials, UI kit) and all 14 pages | `npm run build` ok; Vitest 19 passing; ESLint 0 errors; Stylelint clean; manual browser review of login, projects, board, task drawer, workload, analytics at 1024 px (dark) |
 | [✓] | Docker images (backend, AI with CPU torch, frontend nginx non-root) | Built locally; nothing pushed |
 | [✓] | CI workflow, Dependabot, guards (no-deploy, no-live-LLM, bundle secrets) | Guards run locally; no-deploy guard fails on an injected `docker push` |
-| [→] | Playwright E2E (QA-E2E-01..08) + axe scans (QA-A11Y-01) | Specs written; to be run against the CI Compose stack |
-| [→] | First CI run on GitHub | After push |
+| [✓] | Playwright E2E (QA-E2E-01..08) + axe scans (QA-A11Y-01) | 10/10 passing locally against the CI Compose stack (mock LLM, fake embeddings); zero serious/critical axe issues on 10 pages, light and dark |
+| [→] | CI on GitHub | First run: guard + AI service green; fixed Prettier on e2e files, an order-dependent outbox test and Trivy's Maven 429s (scan now uses the pre-resolved local repo, offline) |
 | [ ] | QA-RAG-EVAL (needs a real Groq key, manual) | — |
 | [ ] | QA-PERF-01 k6 smoke (manual, optional) | — |
 | [!] | Optional: `GROQ_API_KEY` for live answers | Owner action; app works without it |
@@ -46,6 +46,12 @@ Only results that were actually executed are marked ✓. Legend: `[✓]` done an
 | SEC-040, QA-SEC-15 | `scripts/ci/bundle-secret-check.sh` |
 | NFR-013 | `scripts/ci/no-live-llm-guard.sh` |
 | §11 no deployment | `scripts/ci/no-deploy-guard.sh` |
+
+## Fixes found by E2E (2026-10-19)
+
+- Task drawer "More actions" menu sat under the drawer scrim, so mouse clicks were swallowed: menus now stack above dialogs.
+- Board moves were announced twice (board live region + toast live region): board region removed.
+- Account button's accessible name didn't include its visible text (WCAG 2.5.3): the visible name is now the label, kept visually hidden on mobile.
 
 ## Known gaps
 

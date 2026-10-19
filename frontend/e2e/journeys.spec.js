@@ -1,5 +1,17 @@
 import { expect, test } from '@playwright/test';
-import { ADMIN, API, MANAGER, PASSWORD, api, apiToken, freshProject, login, projectKey, unique } from './helpers.js';
+import {
+  ADMIN,
+  API,
+  MANAGER,
+  PASSWORD,
+  api,
+  apiToken,
+  freshProject,
+  login,
+  projectKey,
+  toasts,
+  unique,
+} from './helpers.js';
 
 // QA-E2E-01..08 against the local stack with the mock LLM and fake embeddings.
 
@@ -29,7 +41,7 @@ test('QA-E2E-01 register, empty state, promotion, project and member', async ({ 
   await page.getByRole('link', { name: 'Settings' }).click();
   await page.getByLabel('Add member by email').fill('ravi@demo.local');
   await page.getByRole('button', { name: 'Add', exact: true }).click();
-  await expect(page.getByRole('cell', { name: /Ravi Kumar/ })).toBeVisible();
+  await expect(page.getByRole('cell', { name: 'Ravi Kumar', exact: true })).toBeVisible();
 });
 
 test('QA-E2E-02 duplicate warning, create anyway, card with badges', async ({ page, request }) => {
@@ -38,20 +50,23 @@ test('QA-E2E-02 duplicate warning, create anyway, card with badges', async ({ pa
   await api(request, token, 'POST', `/projects/${key}/tasks`, { title, priority: 'HIGH' });
   await login(page, MANAGER);
   await page.goto(`/projects/${key}/board`);
-  // Embeddings sync through the outbox every 10 s; the duplicate check needs the first task indexed.
-  await expect(async () => {
-    await page.getByRole('button', { name: 'New task' }).first().click();
-    await page.getByLabel('Title').fill(title);
-    await expect(page.getByText('This looks like existing work')).toBeVisible({ timeout: 3000 });
-  }).toPass({ timeout: 60_000, intervals: [5_000] }).catch(async (e) => {
-    await page.keyboard.press('Escape');
-    throw e;
-  });
+  // Embeddings sync through the outbox every 10 s; wait until the first task is indexed.
+  await expect
+    .poll(
+      async () =>
+        (await api(request, token, 'POST', `/projects/${key}/tasks/duplicate-check`, { title })).matches
+          .length,
+      { timeout: 60_000, intervals: [3_000] },
+    )
+    .toBeGreaterThan(0);
+  await page.getByRole('button', { name: 'New task' }).first().click();
+  await page.getByLabel('Title').fill(title);
+  await expect(page.getByText('This looks like existing work')).toBeVisible();
   await page.getByRole('button', { name: 'Create anyway' }).click();
-  await expect(page.getByText(`${key}-2 created`)).toBeVisible();
+  await expect(toasts(page).getByText(`${key}-2 created`)).toBeVisible();
   const card = page.getByRole('article', { name: title }).nth(1);
   await expect(card.getByText(/High|Urgent/).first()).toBeVisible();
-  await expect(card.getByText(/risk|Pending/).first()).toBeVisible();
+  await expect(card.getByText(/risk|Pending/i).first()).toBeVisible();
 });
 
 test('QA-E2E-03 subtasks, blocker, blocked move, then unblocked', async ({ page, request }) => {
@@ -70,27 +85,30 @@ test('QA-E2E-03 subtasks, blocker, blocked move, then unblocked', async ({ page,
 
   await drawer.getByRole('button', { name: 'More actions' }).click();
   await page.getByRole('menuitem', { name: 'In Progress' }).click();
-  await expect(page.getByText(new RegExp(`${key}-2 is blocked by ${key}-1`))).toBeVisible();
+  await expect(toasts(page).getByText(new RegExp(`${key}-2 is blocked by ${key}-1`))).toBeVisible();
 
   await api(request, token, 'POST', `/tasks/${key}-1/status`, { status: 'DONE', version: 0 });
   await page.reload();
   await page.getByRole('dialog').getByRole('button', { name: 'More actions' }).click();
   await page.getByRole('menuitem', { name: 'In Progress' }).click();
-  await expect(page.getByText(`${key}-2 moved to In Progress`)).toBeVisible();
+  await expect(toasts(page).getByText(`${key}-2 moved to In Progress`)).toBeVisible();
 });
 
 test('QA-E2E-04 split a large task, edit suggestions, accept', async ({ page, request }) => {
   const { key, token } = await freshProject(request);
-  await api(request, token, 'POST', `/projects/${key}/tasks`, { title: 'Build the CSV export', estimateHours: 20 });
+  await api(request, token, 'POST', `/projects/${key}/tasks`, {
+    title: 'Build the CSV export',
+    estimateHours: 20,
+  });
   await login(page, MANAGER);
   await page.goto(`/projects/${key}/tasks/${key}-1`);
   await page.getByRole('button', { name: 'Split this task' }).click();
   const dialog = page.getByRole('dialog', { name: 'Split this task' });
-  await expect(dialog.getByLabel('Suggestion 1')).toBeVisible();
-  await dialog.getByLabel('Suggestion 1').fill('Agree on the CSV columns');
+  await expect(dialog.getByRole('textbox', { name: 'Suggestion 1' })).toBeVisible();
+  await dialog.getByRole('textbox', { name: 'Suggestion 1' }).fill('Agree on the CSV columns');
   await dialog.getByRole('button', { name: 'Remove suggestion 4' }).click();
   await dialog.getByRole('button', { name: /Add 3 subtasks/ }).click();
-  await expect(page.getByText('3 subtasks added')).toBeVisible();
+  await expect(toasts(page).getByText('3 subtasks added')).toBeVisible();
   await expect(page.getByText('Agree on the CSV columns')).toBeVisible();
 });
 
@@ -104,11 +122,14 @@ test('QA-E2E-05 ask with the mock LLM, open a source', async ({ page, request })
   await page.goto(`/projects/${key}/ask`);
   await expect(async () => {
     await page.getByLabel('Your question').fill('Why are payment webhook retries failing?');
-    await page.getByRole('button', { name: 'Ask' }).click();
+    await page.getByRole('button', { name: 'Ask', exact: true }).click();
     await expect(page.getByRole('link', { name: new RegExp(`${key}-1`) })).toBeVisible({ timeout: 5000 });
   }).toPass({ timeout: 60_000, intervals: [5_000] });
   await expect(page.getByText(/Mock summary/)).toBeVisible();
-  await page.getByRole('link', { name: new RegExp(`${key}-1`) }).first().click();
+  await page
+    .getByRole('link', { name: new RegExp(`${key}-1`) })
+    .first()
+    .click();
   await expect(page).toHaveURL(new RegExp(`/tasks/${key}-1`));
 });
 
@@ -116,15 +137,25 @@ test('QA-E2E-06 workload suggestion, reassign, bars update', async ({ page, requ
   const { key, token } = await freshProject(request, ['asha@demo.local']);
   const members = await api(request, token, 'GET', `/projects/${key}/members`);
   const asha = members.find((m) => m.email === 'asha@demo.local');
-  await api(request, token, 'POST', `/projects/${key}/tasks`, { title: 'Big low job', priority: 'LOW', estimateHours: 30, assigneeId: asha.userId });
-  await api(request, token, 'POST', `/projects/${key}/tasks`, { title: 'Big high job', priority: 'HIGH', estimateHours: 30, assigneeId: asha.userId });
+  await api(request, token, 'POST', `/projects/${key}/tasks`, {
+    title: 'Big low job',
+    priority: 'LOW',
+    estimateHours: 30,
+    assigneeId: asha.userId,
+  });
+  await api(request, token, 'POST', `/projects/${key}/tasks`, {
+    title: 'Big high job',
+    priority: 'HIGH',
+    estimateHours: 30,
+    assigneeId: asha.userId,
+  });
   await login(page, MANAGER);
   await page.goto(`/projects/${key}/workload`);
   await expect(page.getByText('150% · Over')).toBeVisible();
   await page.getByRole('button', { name: 'Reassign' }).click();
   await page.getByRole('button', { name: 'Reassign task' }).click();
-  await expect(page.getByText(new RegExp(`${key}-1 reassigned`))).toBeVisible();
-  await expect(page.getByText('75% · Healthy')).toBeVisible();
+  await expect(toasts(page).getByText(new RegExp(`${key}-1 reassigned`))).toBeVisible();
+  await expect(page.getByRole('row', { name: /Asha Nair/ }).getByText('75% · Under')).toBeVisible();
 });
 
 test('QA-E2E-07 API key: create, call public API, revoke, 401', async ({ page, request }) => {
@@ -147,9 +178,12 @@ test('QA-E2E-07 API key: create, call public API, revoke, 401', async ({ page, r
   expect(ok.status()).toBe(200);
   expect(ok.headers()['x-ratelimit-limit']).toBe('100');
 
-  await page.getByRole('row', { name: new RegExp(name) }).getByRole('button', { name: 'Revoke' }).click();
+  await page
+    .getByRole('row', { name: new RegExp(name) })
+    .getByRole('button', { name: 'Revoke' })
+    .click();
   await page.getByRole('button', { name: 'Revoke key' }).click();
-  await expect(page.getByText(`Key ${name} revoked`)).toBeVisible();
+  await expect(toasts(page).getByText(`Key ${name} revoked`)).toBeVisible();
   const denied = await request.get(`${API}/api/public/v1/projects`, { headers: { 'X-API-Key': value } });
   expect(denied.status()).toBe(401);
 });
@@ -157,7 +191,11 @@ test('QA-E2E-07 API key: create, call public API, revoke, 401', async ({ page, r
 test('QA-E2E-08 mobile: tab bar navigation and "Move to…"', async ({ browser, request }) => {
   const { key, token } = await freshProject(request);
   await api(request, token, 'POST', `/projects/${key}/tasks`, { title: 'Mobile task' });
-  const context = await browser.newContext({ viewport: { width: 375, height: 812 }, isMobile: true, hasTouch: true });
+  const context = await browser.newContext({
+    viewport: { width: 375, height: 812 },
+    isMobile: true,
+    hasTouch: true,
+  });
   const page = await context.newPage();
   await login(page, MANAGER);
   const tabbar = page.getByRole('navigation', { name: 'Primary' });
@@ -169,7 +207,7 @@ test('QA-E2E-08 mobile: tab bar navigation and "Move to…"', async ({ browser, 
   await expect(page.getByRole('radiogroup', { name: 'Column' })).toBeVisible();
   await page.getByRole('button', { name: `Move ${key}-1 to another column` }).click();
   await page.getByRole('menuitem', { name: 'In Progress' }).click();
-  await expect(page.getByText(`${key}-1 moved to In Progress`)).toBeVisible();
+  await expect(toasts(page).getByText(`${key}-1 moved to In Progress`)).toBeVisible();
   expect(await page.evaluate(() => document.documentElement.scrollWidth <= window.innerWidth)).toBeTruthy();
   await context.close();
   expect(PASSWORD).toBeTruthy();

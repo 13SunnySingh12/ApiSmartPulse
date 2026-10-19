@@ -17,7 +17,9 @@ const pages = (key) => [
 
 async function scan(page, label) {
   await page.waitForLoadState('networkidle');
-  const result = await new AxeBuilder({ page }).withTags(['wcag2a', 'wcag2aa', 'wcag21a', 'wcag21aa', 'wcag22aa']).analyze();
+  const result = await new AxeBuilder({ page })
+    .withTags(['wcag2a', 'wcag2aa', 'wcag21a', 'wcag21aa', 'wcag22aa'])
+    .analyze();
   const serious = result.violations.filter((v) => ['serious', 'critical'].includes(v.impact));
   expect(serious.map((v) => `${label}: ${v.id} (${v.nodes.length}) ${v.help}`)).toEqual([]);
 }
@@ -25,7 +27,10 @@ async function scan(page, label) {
 for (const scheme of ['light', 'dark']) {
   test(`axe: main pages in ${scheme} theme`, async ({ browser, request }) => {
     const { key, token } = await freshProject(request, ['ravi@demo.local']);
-    await api(request, token, 'POST', `/projects/${key}/tasks`, { title: 'Accessibility check task', estimateHours: 4 });
+    await api(request, token, 'POST', `/projects/${key}/tasks`, {
+      title: 'Accessibility check task',
+      estimateHours: 4,
+    });
     const context = await browser.newContext({ colorScheme: scheme });
     const page = await context.newPage();
 

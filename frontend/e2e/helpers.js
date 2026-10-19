@@ -5,7 +5,7 @@ export const PASSWORD = process.env.E2E_PASSWORD; // SEED_DEMO_PASSWORD of the l
 export const ADMIN = process.env.E2E_ADMIN_EMAIL || 'admin@demo.local';
 export const MANAGER = 'priya@demo.local';
 
-if (!PASSWORD) throw new Error('Set E2E_PASSWORD to the stack\'s SEED_DEMO_PASSWORD');
+if (!PASSWORD) throw new Error("Set E2E_PASSWORD to the stack's SEED_DEMO_PASSWORD");
 
 export const unique = (prefix) => `${prefix}${Date.now().toString(36).slice(-5).toUpperCase()}`;
 
@@ -47,6 +47,13 @@ export async function freshProject(request, members = []) {
   const token = await apiToken(request, MANAGER);
   const key = projectKey();
   await api(request, token, 'POST', '/projects', { key, name: `E2E ${key}` });
-  for (const m of members) await api(request, token, 'POST', `/projects/${key}/members`, { userEmail: m, capacityHours: 40 });
+  for (const m of members)
+    await api(request, token, 'POST', `/projects/${key}/members`, { userEmail: m, capacityHours: 40 });
   return { key, token };
 }
+
+/**
+ * The visible toast list (its text is also mirrored in a hidden live region). Located by class:
+ * while a modal is open, Radix marks everything outside it aria-hidden.
+ */
+export const toasts = (page) => page.locator('.toasts');

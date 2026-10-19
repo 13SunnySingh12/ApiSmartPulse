@@ -207,7 +207,13 @@ class AiIT extends IntegrationTest {
     TestUser m = user(Role.MANAGER);
     String key = project(m);
     long id = task(key, m, "Embed me").path("id").asLong();
-    jdbc.sql("UPDATE ai_sync_queue SET next_attempt_at = now() - interval '1 second'").update();
+    aiClient.resetCircuit();
+    // Only this task's row is due: rows left by other test classes must not fill the batch.
+    jdbc.sql(
+            "UPDATE ai_sync_queue SET next_attempt_at = CASE WHEN entity_type = 'TASK' AND entity_id = ?"
+                + " THEN now() - interval '1 second' ELSE now() + interval '1 hour' END")
+        .param(id)
+        .update();
     stub("/internal/v1/embeddings/upsert", 500, "{}");
     outbox.processBatch();
     var row =
