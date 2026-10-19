@@ -1,0 +1,86 @@
+# Local runtime only (§11.4). Nothing here is deployed or published; ports bind to 127.0.0.1.
+name: apismartpulse
+
+x-logging: &logging
+  driver: json-file
+  options: { max-size: "10m", max-file: "3" }
+
+services:
+  db:
+    image: pgvector/pgvector:pg16
+    environment:
+      POSTGRES_DB: ${POSTGRES_DB:-apismartpulse}
+      POSTGRES_PASSWORD: ${POSTGRES_SUPERUSER_PASSWORD:?set POSTGRES_SUPERUSER_PASSWORD in .env}
+      DB_OWNER_PASSWORD: ${DB_OWNER_PASSWORD:?set DB_OWNER_PASSWORD in .env}
+      DB_APP_PASSWORD: ${DB_APP_PASSWORD:?set DB_APP_PASSWORD in .env}
+      DB_AI_PASSWORD: ${DB_AI_PASSWORD:?set DB_AI_PASSWORD in .env}
+    volumes:
+      - pgdata:/var/lib/postgresql/data
+      - ./db/init:/docker-entrypoint-initdb.d:ro
+    ports: ["127.0.0.1:${DB_HOST_PORT:-5432}:5432"]
+    healthcheck:
+      test: ["CMD-SHELL", "pg_isready -U postgres -d ${POSTGRES_DB:-apismartpulse}"]
+      interval: 5s
+      retries: 20
+    logging: *logging
+
+  backend:
+    build: ./backend
+    env_file: .env
+    depends_on: { db: { condition: service_healthy } }
+    ports: ["127.0.0.1:${BACKEND_HOST_PORT:-8080}:8080"]
+    healthcheck:
+      test: ["CMD", "wget", "-qO-", "http://localhost:8080/actuator/health"]
+      interval: 10s
+      retries: 30
+      start_period: 30s
+    logging: *logging
+
+  ai-service:
+    build:
+      context: ./ai-service
+      args: { INSTALL_ML_EXTRAS: "${INSTALL_ML_EXTRAS:-true}" }
+    env_file: .env
+    environment:
+      HF_HOME: /cache/hf
+      MODELS_DIR: /models
+    volumes:
+      - ml-models:/models
+      - hf-cache:/cache/hf
+    depends_on: { backend: { condition: service_healthy } } # migrations applied first
+    expose: ["8000"] # internal only — not published to the host
+    healthcheck:
+      test: ["CMD", "python", "-c", "import urllib.request;urllib.request.urlopen('http://localhost:8000/health')"]
+      interval: 10s
+      retries: 30
+    logging: *logging
+
+  ai-service-debug:
+    # `docker compose --profile dev-ai up ai-service-debug` publishes the AI API on 127.0.0.1:8000
+    extends: ai-service
+    profiles: ["dev-ai"]
+    ports: ["127.0.0.1:8000:8000"]
+
+  frontend:
+    build:
+      context: ./frontend
+      args:
+        VITE_API_BASE_URL: ${VITE_API_BASE_URL:-http://localhost:8080}
+        VITE_SPLIT_MIN_HOURS: ${VITE_SPLIT_MIN_HOURS:-16}
+    ports: ["127.0.0.1:${FRONTEND_HOST_PORT:-8081}:8080"] # nginx (non-root) serving the production build
+    depends_on: [backend]
+    logging: *logging
+
+  seed:
+    build:
+      context: ./ai-service
+      args: { INSTALL_ML_EXTRAS: "false" }
+    command: ["python", "-m", "scripts.seed"]
+    env_file: .env
+    profiles: ["tools"]
+    depends_on: { backend: { condition: service_healthy } }
+
+volumes:
+  pgdata: {}
+  ml-models: {}
+  hf-cache: {}

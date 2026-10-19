@@ -1,0 +1,46 @@
+# Secrets — only .env.example is committed
+.env
+.env.*
+!.env.example
+
+# Java / Maven
+backend/target/
+*.class
+.mvn/wrapper/maven-wrapper.jar
+
+# Python
+__pycache__/
+*.py[cod]
+.venv/
+venv/
+.mypy_cache/
+.pytest_cache/
+.ruff_cache/
+ai-service/models/
+ai-service/reports/
+.coverage
+htmlcov/
+
+# Node / frontend
+**/node_modules/
+frontend/dist/
+frontend/playwright-report/
+frontend/test-results/
+frontend/blob-report/
+frontend/coverage/
+frontend/src/styles/tokens.generated.css
+
+# Local data, logs, backups
+backups/
+*.log
+compose-logs.txt
+
+# IDE / OS
+.idea/
+.vscode/
+*.iml
+.DS_Store
+Thumbs.db
+
+# Local tooling
+.claude/

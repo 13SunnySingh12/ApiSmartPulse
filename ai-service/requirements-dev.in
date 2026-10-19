@@ -1,0 +1,7 @@
+# Runtime + test/lint tools. No ML extras: tests use the fake embedder and mock LLM.
+-r requirements.in
+pytest==9.1.1
+respx==0.23.1
+ruff==0.17.1
+mypy==2.4.0
+pandas-stubs==3.0.5.260914

@@ -1,0 +1,28 @@
+[project]
+name = "apismartpulse-ai"
+version = "1.0.0"
+description = "Internal AI service for ApiSmartPulse (predictions, embeddings, RAG, auto-split)"
+requires-python = ">=3.12,<3.13"
+
+[tool.ruff]
+line-length = 140
+target-version = "py312"
+
+[tool.ruff.lint]
+select = ["E", "F", "I", "B", "UP", "S", "SIM", "PL", "RUF"]
+ignore = ["PLR0913", "PLR2004", "PLR0911", "PLR0912", "PLR0915", "S101", "RUF001", "RUF002", "RUF003", "PLW0603"]
+
+[tool.ruff.lint.per-file-ignores]
+"tests/**" = ["S", "PLR", "SLF001"]
+"scripts/**" = ["S311", "PLR"]
+
+[tool.mypy]
+python_version = "3.12"
+strict = true
+ignore_missing_imports = true
+warn_unused_ignores = false
+disallow_untyped_calls = false
+
+[tool.pytest.ini_options]
+testpaths = ["tests"]
+addopts = "-q"

@@ -1,0 +1,142 @@
+/* Design tokens — light theme (§4.3.1, §4.5). Dark values live in tokens.dark.js and are emitted to
+   tokens.generated.css by `npm run tokens`. Components use only these variables (stylelint-enforced). */
+:root {
+  color-scheme: light;
+
+  /* colour */
+  --bg-base: #eef0fb;
+  --bg-blob-1: #c9c2ff;
+  --bg-blob-2: #a7f0e4;
+  --bg-blob-3: #ffd3c4;
+  --glass-fill: rgb(255 255 255 / 62%);
+  --glass-strong-fill: rgb(255 255 255 / 78%);
+  --glass-border: rgb(255 255 255 / 75%);
+  --glass-edge: rgb(26 29 46 / 8%);
+  --glass-fallback: #f7f7fd;
+  --clay-surface: #f6f5ff;
+  --text-1: #1a1d2e;
+  --text-2: #454b63;
+  --text-muted: #5a6079;
+  --primary: #5b4be0;
+  --primary-text: #4a3bd0;
+  --on-primary: #fff;
+  --danger: #c2283a;
+  --on-danger: #fff;
+  --success-fg: #0b6b52;
+  --success-bg: #ddf6ee;
+  --warning-fg: #8a5200;
+  --warning-bg: #fff1d6;
+  --error-fg: #9f1d2c;
+  --error-bg: #fde3e5;
+  --scrim: rgb(26 29 46 / 40%);
+  --chart-2: #0f8c79;
+  --hover-tint: color-mix(in srgb, var(--primary) 6%, transparent);
+  --primary-tint: color-mix(in srgb, var(--primary) 12%, var(--clay-surface));
+
+  /* label palette (§4.3.4) — dots only, never text */
+  --label-slate: #64748b;
+  --label-violet: #7c6cf0;
+  --label-blue: #3b82f6;
+  --label-teal: #14b8a6;
+  --label-green: #22c55e;
+  --label-amber: #f59e0b;
+  --label-orange: #f97316;
+  --label-rose: #f43f5e;
+
+  /* typography (§4.4) */
+  --font-sans: 'Plus Jakarta Sans', system-ui, -apple-system, 'Segoe UI', sans-serif;
+  --font-mono: 'JetBrains Mono', ui-monospace, 'Cascadia Mono', monospace;
+  --type-display: 700 32px/40px var(--font-sans);
+  --type-h1: 700 24px/32px var(--font-sans);
+  --type-h2: 600 20px/28px var(--font-sans);
+  --type-h3: 600 16px/24px var(--font-sans);
+  --type-body: 400 15px/24px var(--font-sans);
+  --type-small: 500 13px/20px var(--font-sans);
+  --type-micro: 600 12px/16px var(--font-sans);
+  --type-mono: 500 13px/20px var(--font-mono);
+
+  /* spacing — 4 px base */
+  --space-1: 4px;
+  --space-2: 8px;
+  --space-3: 12px;
+  --space-4: 16px;
+  --space-5: 20px;
+  --space-6: 24px;
+  --space-8: 32px;
+  --space-10: 40px;
+  --space-12: 48px;
+
+  /* sizing */
+  --control-h-sm: 32px;
+  --control-h-md: 40px;
+  --control-h-lg: 48px;
+  --sidebar-w: 248px;
+  --sidebar-w-collapsed: 72px;
+  --detail-panel-w: 480px;
+  --topbar-h: 64px;
+  --tabbar-h: 56px;
+
+  /* radii */
+  --radius-sm: 10px;
+  --radius-md: 14px;
+  --radius-lg: 18px;
+  --radius-xl: 24px;
+  --radius-pill: 999px;
+
+  /* blur (never above 24px) */
+  --blur-sm: 8px;
+  --blur-md: 16px;
+  --blur-lg: 24px;
+
+  /* borders */
+  --border-hairline: 1px solid var(--glass-edge);
+  --border-glass: 1px solid var(--glass-border);
+
+  /* elevation */
+  --shadow-glass-1: 0 8px 32px rgb(31 38 80 / 10%);
+  --shadow-glass-2: 0 16px 48px rgb(31 38 80 / 18%);
+  --clay-raised:
+    6px 6px 14px rgb(91 75 224 / 16%), -4px -4px 10px rgb(255 255 255 / 90%),
+    inset 1px 1px 2px rgb(255 255 255 / 80%), inset -2px -2px 4px rgb(91 75 224 / 8%);
+  --clay-hover:
+    8px 10px 20px rgb(91 75 224 / 20%), -4px -4px 12px rgb(255 255 255 / 95%),
+    inset 1px 1px 2px rgb(255 255 255 / 80%), inset -2px -2px 4px rgb(91 75 224 / 8%);
+  --clay-inset: inset 3px 3px 6px rgb(91 75 224 / 14%), inset -3px -3px 6px rgb(255 255 255 / 85%);
+  --clay-flat: 0 1px 2px rgb(31 38 80 / 8%);
+
+  /* motion */
+  --ease: cubic-bezier(0.2, 0.8, 0.2, 1);
+  --dur-fast: 120ms;
+  --dur-base: 180ms;
+
+  /* focus */
+  --focus-ring: 0 0 0 2px var(--clay-surface), 0 0 0 4px var(--primary);
+
+  /* canvas */
+  --canvas:
+    radial-gradient(60vw 60vw at 0% 0%, var(--bg-blob-1) 0%, transparent 60%),
+    radial-gradient(50vw 50vw at 100% 35%, var(--bg-blob-2) 0%, transparent 60%),
+    radial-gradient(60vw 45vw at 50% 110%, var(--bg-blob-3) 0%, transparent 60%), var(--bg-base);
+
+  /* composite tokens (keep components on variables only) */
+  --glass-shadow: inset 0 1px 0 var(--glass-border), var(--shadow-glass-1);
+  --glass-shadow-raised: inset 0 1px 0 var(--glass-border), var(--shadow-glass-2);
+  --clay-raised-focus: var(--clay-raised), var(--focus-ring);
+  --clay-inset-focus: var(--clay-inset), var(--focus-ring);
+  --input-invalid: inset 3px 0 0 var(--error-fg), var(--clay-inset);
+  --accent-primary-edge: inset 3px 0 0 var(--primary), var(--clay-raised);
+  --accent-danger-edge: inset 3px 0 0 var(--danger), var(--shadow-glass-1);
+  --drop-target: inset 0 0 0 2px var(--primary), var(--shadow-glass-1);
+  --avatar-ring: 0 0 0 2px var(--clay-surface);
+  --primary-hover: color-mix(in srgb, var(--primary) 94%, white);
+  --skeleton-fill:
+    linear-gradient(100deg, transparent 30%, var(--glass-border) 50%, transparent 70%) 0 0 / 200% 100%,
+    var(--clay-surface);
+
+  /* layering */
+  --z-glass: 1;
+  --z-sticky: 10;
+  --z-overlay: 30;
+  --z-dialog: 40;
+  --z-toast: 50;
+}

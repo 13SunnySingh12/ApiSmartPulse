@@ -1,0 +1,5 @@
+# Local embedding extras (installed when INSTALL_ML_EXTRAS=true). CPU-only PyTorch wheels.
+# Compile: pip-compile --generate-hashes --allow-unsafe --extra-index-url https://download.pytorch.org/whl/cpu -o requirements-ml.txt requirements-ml.in
+-c requirements.txt
+torch==2.14.1+cpu
+sentence-transformers==6.1.0

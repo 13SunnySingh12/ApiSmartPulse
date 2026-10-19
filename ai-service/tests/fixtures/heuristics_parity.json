@@ -1,0 +1,47 @@
+{
+  "description": "Shared cases for the rule-based fallback (TR-007). Asserted by backend HeuristicParityTest and ai-service test_heuristics.py.",
+  "cases": [
+    {
+      "name": "high keyword, five working days, low risk",
+      "input": {"priority": "HIGH", "title": "Fix login bug", "description": "", "estimateHours": 6, "dueDate": "2026-10-23", "today": "2026-10-19", "openBlockers": 0},
+      "medianByPriority": {"HIGH": 6.3},
+      "globalMedian": 5.0,
+      "expected": {"predictedHours": 6.5, "overdueProbability": 0.25, "riskLevel": "LOW", "suggestedPriority": "HIGH", "priorityConfidence": 0.6}
+    },
+    {
+      "name": "urgent keyword, global median, blocked",
+      "input": {"priority": "LOW", "title": "Security patch ASAP", "description": null, "estimateHours": null, "dueDate": "2026-10-20", "today": "2026-10-19", "openBlockers": 1},
+      "medianByPriority": {},
+      "globalMedian": 4.8,
+      "expected": {"predictedHours": 5.0, "overdueProbability": 0.671, "riskLevel": "HIGH", "suggestedPriority": "URGENT", "priorityConfidence": 0.6}
+    },
+    {
+      "name": "no due date means risk N/A; default 4 h",
+      "input": {"priority": "MEDIUM", "title": "Write docs", "description": "Onboarding guide", "estimateHours": null, "dueDate": null, "today": "2026-10-19", "openBlockers": 0},
+      "medianByPriority": {},
+      "globalMedian": null,
+      "expected": {"predictedHours": 4.0, "overdueProbability": null, "riskLevel": "NA", "suggestedPriority": "MEDIUM", "priorityConfidence": 0.4}
+    },
+    {
+      "name": "past due is certain",
+      "input": {"priority": "MEDIUM", "title": "Error in export", "description": "", "estimateHours": null, "dueDate": "2026-10-16", "today": "2026-10-19", "openBlockers": 0},
+      "medianByPriority": {"MEDIUM": 2.0},
+      "globalMedian": 9.0,
+      "expected": {"predictedHours": 2.0, "overdueProbability": 1.0, "riskLevel": "HIGH", "suggestedPriority": "HIGH", "priorityConfidence": 0.6}
+    },
+    {
+      "name": "weekend has no working days; keywords need word boundaries",
+      "input": {"priority": "MEDIUM", "title": "Prefix fixture", "description": "debugging notes", "estimateHours": 8, "dueDate": "2026-10-25", "today": "2026-10-24", "openBlockers": 0},
+      "medianByPriority": {},
+      "globalMedian": null,
+      "expected": {"predictedHours": 4.0, "overdueProbability": 1.0, "riskLevel": "HIGH", "suggestedPriority": "MEDIUM", "priorityConfidence": 0.4}
+    },
+    {
+      "name": "medium risk",
+      "input": {"priority": "URGENT", "title": "Plan the quarter", "description": "", "estimateHours": 12, "dueDate": "2026-10-23", "today": "2026-10-19", "openBlockers": 0},
+      "medianByPriority": {"URGENT": 1.2},
+      "globalMedian": null,
+      "expected": {"predictedHours": 1.0, "overdueProbability": 0.5, "riskLevel": "MEDIUM", "suggestedPriority": "MEDIUM", "priorityConfidence": 0.4}
+    }
+  ]
+}

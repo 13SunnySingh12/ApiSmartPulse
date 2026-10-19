@@ -1,0 +1,71 @@
+# Every value comes from the environment (§5.10). Missing required variables fail startup.
+spring:
+  application:
+    name: apismartpulse-backend
+  datasource:
+    url: ${JDBC_DATABASE_URL}
+    username: ${DB_APP_USER:asp_app}
+    password: ${DB_APP_PASSWORD}
+    hikari:
+      maximum-pool-size: 10
+  flyway:
+    user: ${DB_OWNER_USER:asp_owner}
+    password: ${DB_OWNER_PASSWORD}
+    locations: classpath:db/migration
+  jpa:
+    open-in-view: false
+    hibernate:
+      ddl-auto: none
+  jackson:
+    deserialization:
+      fail-on-unknown-properties: true
+  threads:
+    virtual:
+      enabled: false
+
+server:
+  port: 8080
+  error:
+    include-stacktrace: never
+    include-message: never
+  tomcat:
+    max-swallow-size: 128KB
+    max-http-form-post-size: 64KB
+
+app:
+  jwt-secret: ${JWT_SECRET}
+  jwt-access-ttl-minutes: ${JWT_ACCESS_TTL_MINUTES:15}
+  refresh-ttl-days: ${REFRESH_TTL_DAYS:7}
+  internal-service-token: ${INTERNAL_SERVICE_TOKEN}
+  ai-service-url: ${AI_SERVICE_URL:http://localhost:8000}
+  cors-allowed-origins: ${CORS_ALLOWED_ORIGINS:http://localhost:5173,http://localhost:8081}
+  public-api-rate-per-minute: ${PUBLIC_API_RATE_PER_MINUTE:100}
+  ai-user-limit-per10-min: ${AI_USER_LIMIT_PER_10MIN:5}
+  split-min-hours: ${SPLIT_MIN_HOURS:16}
+  timezone: ${APP_TIMEZONE:Asia/Kolkata}
+  jobs-enabled: true
+  login-rate-per-minute: ${LOGIN_RATE_PER_MINUTE:10}
+
+springdoc:
+  api-docs:
+    enabled: ${SPRINGDOC_ENABLED:true}
+  swagger-ui:
+    enabled: ${SPRINGDOC_ENABLED:true}
+    path: /swagger-ui
+  writer-with-order-by-keys: true
+
+management:
+  endpoints:
+    web:
+      exposure:
+        include: health,info
+  endpoint:
+    health:
+      show-details: never
+
+logging:
+  level:
+    root: ${LOG_LEVEL:INFO}
+  structured:
+    format:
+      console: ecs

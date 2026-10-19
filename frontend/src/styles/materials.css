@@ -1,0 +1,99 @@
+/* The two materials (§4.2): glass = structure, clay = things you press or move. */
+
+/* Glass-1: sidebar, top bar, panels, columns. Glass-2: menus, toasts. Strong: dialogs, drawers. */
+.glass {
+  background: var(--glass-fill);
+  backdrop-filter: blur(var(--blur-sm)) saturate(140%);
+  border: var(--border-hairline);
+  box-shadow: var(--glass-shadow);
+  border-radius: var(--radius-xl);
+}
+
+.glass--md {
+  backdrop-filter: blur(var(--blur-md)) saturate(140%);
+}
+
+.glass--raised {
+  backdrop-filter: blur(var(--blur-md)) saturate(140%);
+  box-shadow: var(--glass-shadow-raised);
+}
+
+.glass--strong {
+  background: var(--glass-strong-fill);
+  backdrop-filter: blur(var(--blur-lg)) saturate(140%);
+  box-shadow: var(--glass-shadow-raised);
+}
+
+/* Large lists stay cheap: board columns use the plain fill without blur when they hold many cards. */
+.glass--flat {
+  backdrop-filter: none;
+}
+
+@supports not ((backdrop-filter: blur(1px)) or (-webkit-backdrop-filter: blur(1px))) {
+  .glass,
+  .glass--strong {
+    background: var(--glass-fallback);
+  }
+}
+
+@media (prefers-reduced-transparency: reduce) {
+  .glass,
+  .glass--md,
+  .glass--raised,
+  .glass--strong {
+    background: var(--glass-fallback);
+    backdrop-filter: none;
+  }
+}
+
+/* Mobile: one blur step everywhere for performance (§4.8). */
+@media (max-width: 639px) {
+  .glass--md,
+  .glass--raised,
+  .glass--strong {
+    backdrop-filter: blur(var(--blur-sm)) saturate(140%);
+  }
+}
+
+/* Clay: raised objects with layered soft shadows. Pressed/selected = inset. */
+.clay {
+  background: var(--clay-surface);
+  border-radius: var(--radius-lg);
+  box-shadow: var(--clay-raised);
+  transition:
+    box-shadow var(--dur-base) var(--ease),
+    transform var(--dur-base) var(--ease);
+}
+
+.clay--interactive:hover {
+  box-shadow: var(--clay-hover);
+  transform: translateY(-1px);
+}
+
+.clay--interactive:active,
+.clay[aria-pressed='true'],
+.clay[aria-selected='true'],
+.clay[data-state='active'] {
+  box-shadow: var(--clay-inset);
+  transform: translateY(1px);
+}
+
+/* Flat clay: chips inside clay cards (no raised-on-raised, DS-011). */
+.clay-flat {
+  background: var(--clay-surface);
+  box-shadow: var(--clay-flat);
+}
+
+.clay-inset {
+  background: var(--clay-surface);
+  box-shadow: var(--clay-inset);
+}
+
+@media (prefers-reduced-motion: reduce) {
+  .clay,
+  .clay--interactive:hover,
+  .clay--interactive:active {
+    transform: none;
+    transition: none;
+  }
+}

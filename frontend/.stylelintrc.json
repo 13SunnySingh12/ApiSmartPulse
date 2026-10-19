@@ -1,0 +1,31 @@
+{
+  "extends": ["stylelint-config-standard"],
+  "plugins": ["stylelint-declaration-strict-value"],
+  "ignoreFiles": ["src/styles/tokens.css", "src/styles/tokens.generated.css", "dist/**"],
+  "rules": {
+    "scale-unlimited/declaration-strict-value": [
+      ["/color$/", "fill", "stroke", "box-shadow", "border-radius", "background"],
+      {
+        "ignoreValues": [
+          "transparent",
+          "inherit",
+          "currentColor",
+          "currentcolor",
+          "none",
+          "0",
+          "initial",
+          "unset",
+          "50%"
+        ],
+        "ignoreFunctions": false,
+        "expandShorthand": false
+      }
+    ],
+    "selector-class-pattern": null,
+    "custom-property-pattern": null,
+    "keyframes-name-pattern": null,
+    "no-descending-specificity": null,
+    "declaration-empty-line-before": null,
+    "media-feature-range-notation": null
+  }
+}

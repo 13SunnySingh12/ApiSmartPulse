@@ -1,0 +1,17 @@
+# Overrides for CI and local E2E: deterministic mock LLM, fake embeddings, no PyTorch download.
+# Use with: docker compose -f docker-compose.yml -f docker-compose.ci.yml up -d --build --wait
+services:
+  backend:
+    environment:
+      LLM_PROVIDER: mock
+      LOGIN_RATE_PER_MINUTE: "300" # E2E logs in many times from one runner IP
+  ai-service:
+    build:
+      args: { INSTALL_ML_EXTRAS: "false" }
+    environment:
+      LLM_PROVIDER: mock
+      EMBEDDINGS_BACKEND: fake
+      ML_MIN_TRAINING_ROWS: "20"
+  seed:
+    environment:
+      LLM_PROVIDER: mock
