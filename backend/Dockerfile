@@ -1,5 +1,5 @@
 # Local/CI image only — never pushed to a registry.
-FROM maven:3.9-eclipse-temurin-17 AS build
+FROM maven:3.9-eclipse-temurin-26 AS build
 WORKDIR /src
 COPY pom.xml .
 RUN mvn -q -B -ntp dependency:go-offline
