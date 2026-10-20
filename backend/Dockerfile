@@ -6,7 +6,7 @@ RUN mvn -q -B -ntp dependency:go-offline
 COPY src ./src
 RUN mvn -q -B -ntp -DskipTests package
 
-FROM eclipse-temurin:17-jre
+FROM eclipse-temurin:24-jre
 RUN groupadd --system app && useradd --system --gid app --no-create-home app
 WORKDIR /app
 COPY --from=build /src/target/apismartpulse-backend-*.jar app.jar
