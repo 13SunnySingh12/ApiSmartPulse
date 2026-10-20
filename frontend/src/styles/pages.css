@@ -116,6 +116,37 @@
   color: var(--text-2);
 }
 
+.auth__divider {
+  display: flex;
+  gap: var(--space-3);
+  align-items: center;
+  font: var(--type-small);
+  color: var(--text-muted);
+}
+
+.auth__divider::before,
+.auth__divider::after {
+  content: '';
+  flex: 1;
+  border-top: var(--border-hairline);
+}
+
+/* Password field with an inline show/hide toggle. */
+.password-input {
+  position: relative;
+}
+
+.password-input .input {
+  padding-right: var(--space-12);
+}
+
+.password-input .icon-btn {
+  position: absolute;
+  top: 50%;
+  right: var(--space-1);
+  transform: translateY(-50%);
+}
+
 /* ── stats & projects (P-03) ───────────────────────────────────────────────── */
 .stats {
   display: grid;

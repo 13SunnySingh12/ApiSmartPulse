@@ -45,6 +45,8 @@ app:
   timezone: ${APP_TIMEZONE:Asia/Kolkata}
   jobs-enabled: true
   login-rate-per-minute: ${LOGIN_RATE_PER_MINUTE:10}
+  auth-provider: ${AUTH_PROVIDER:local} # local = built-in login; neon = Neon Auth JWTs
+  neon-auth-url: ${NEON_AUTH_URL:}
 
 springdoc:
   api-docs:

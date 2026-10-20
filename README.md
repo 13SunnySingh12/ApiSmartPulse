@@ -64,6 +64,44 @@ and the cached embedding model.
 shows matching tasks with a "AI answers are turned off" notice and split suggestions are unavailable.
 Gemini is not implemented (optional P2).
 
+## Neon database and Neon Auth (optional)
+
+The same stack can run against a Neon Postgres branch with sign-in by **Neon Auth** (Neon's managed
+Better Auth): email/password and Google. The browser signs in with Neon Auth through the official
+`@neondatabase/neon-js` SDK; the API accepts the session's 15-minute EdDSA JWT, verifies it against
+the branch JWKS (issuer, audience, expiry) and maps it to an app user by `users.auth_user_id`
+(created on first use as MEMBER). Roles, projects and permissions stay in the app's tables. The
+built-in login is switched off in this mode (`AUTH_PROVIDER=neon`); CI and offline work keep
+`AUTH_PROVIDER=local`.
+
+One-time setup per branch (Auth must be enabled on the branch in the Neon Console):
+
+```bash
+bash scripts/make-neon-env.sh <endpoint-host> <neon-auth-base-url> > .env.neon   # gitignored
+python scripts/neon-roles-sql.py > .env.neon-roles.sql   # run it in the branch's SQL Editor, then delete it
+```
+
+The SQL creates `asp_owner`, `asp_app` and `asp_ai` (plain roles, not `neon_superuser`), enables
+pgvector and gives `public` to `asp_owner`; Flyway applies the migrations on the first start. Neon only
+accepts plaintext role passwords, so treat that file as a secret. Start the stack (no local Postgres):
+
+```bash
+docker compose -f docker-compose.yml -f docker-compose.neon.yml --env-file .env --env-file .env.neon up -d --build
+```
+
+Connections use TLS with full certificate verification (`verify-full`). The demo seed refuses to run in
+this mode: seeded users have local passwords, not Neon Auth accounts. Promote your first account to
+admin after signing in once: `UPDATE users SET role = 'ADMIN' WHERE email = 'you@example.com';`.
+
+Before real users: in the Neon Console, (1) add your own Google OAuth client (the default shared
+credentials show Neon's name on the consent screen and are for development); register
+`{NEON_AUTH_BASE_URL}/callback/google` as the authorized redirect URI in Google Cloud Console;
+(2) add your app's origin to **Trusted domains** (localhost is allowed by default); (3) consider
+turning on email verification. Password reset is not offered in the UI: Neon documents it only for
+its prebuilt UI components, not for the SDK methods. Sessions live in Neon Auth cookies on the
+`*.neonauth.*` domain, which Safari's tracking prevention can block for an app on another site;
+serve the app and auth under one site for production.
+
 ## Development
 
 | Task | Backend (`backend/`) | AI service (`ai-service/`) | Frontend (`frontend/`) |

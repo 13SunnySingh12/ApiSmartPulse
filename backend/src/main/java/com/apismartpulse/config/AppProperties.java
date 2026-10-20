@@ -20,7 +20,9 @@ public record AppProperties(
     int publicApiRatePerMinute,
     int aiUserLimitPer10Min,
     double splitMinHours,
-    ZoneId timezone) {
+    ZoneId timezone,
+    String authProvider,
+    String neonAuthUrl) {
 
   public AppProperties {
     requireSecret("JWT_SECRET", jwtSecret);
@@ -28,6 +30,22 @@ public record AppProperties(
     if (corsAllowedOrigins.stream().anyMatch(o -> o.contains("*"))) {
       throw new IllegalStateException("CORS_ALLOWED_ORIGINS must not contain wildcards");
     }
+    if (!"local".equals(authProvider) && !"neon".equals(authProvider)) {
+      throw new IllegalStateException("AUTH_PROVIDER must be 'local' or 'neon'");
+    }
+    boolean secureUrl =
+        neonAuthUrl != null
+            && (neonAuthUrl.startsWith("https://")
+                || neonAuthUrl.startsWith("http://localhost:")
+                || neonAuthUrl.startsWith("http://127.0.0.1:")); // loopback for tests only
+    if (neonAuth() && !secureUrl) {
+      throw new IllegalStateException("NEON_AUTH_URL (https) is required when AUTH_PROVIDER=neon");
+    }
+  }
+
+  /** Identity comes from Neon Auth (managed Better Auth) instead of the built-in login. */
+  public boolean neonAuth() {
+    return "neon".equals(authProvider);
   }
 
   private static void requireSecret(String name, String value) {

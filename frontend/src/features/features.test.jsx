@@ -5,7 +5,7 @@ import { http, HttpResponse } from 'msw';
 import { DndContext } from '@dnd-kit/core';
 import { API, renderWithProviders, server, expectNoSeriousA11yViolations } from '../test/utils.jsx';
 import { AuthContext, AuthProvider } from '../auth/AuthProvider.jsx';
-import { LoginPage } from './auth/AuthPages.jsx';
+import { LoginPage, RegisterPage } from './auth/AuthPages.jsx';
 import { ProjectContext } from './projects/ProjectLayout.jsx';
 import { TaskDetail } from './task/TaskDetail.jsx';
 import { TaskCard } from './board/TaskCard.jsx';
@@ -53,6 +53,31 @@ const TASK = {
   createdAt: '2026-10-01T10:00:00Z',
   updatedAt: '2026-10-01T10:00:00Z',
 };
+
+describe('Register', () => {
+  it('checks the confirmation and toggles password visibility', async () => {
+    noSession();
+    renderWithProviders(
+      <AuthProvider>
+        <RegisterPage />
+      </AuthProvider>,
+    );
+    const password = await screen.findByLabelText('Password');
+    await userEvent.type(password, 'Pulse-check-2026');
+    await userEvent.type(screen.getByLabelText('Confirm password'), 'Pulse-check-2027');
+    const toggle = screen.getAllByRole('button', { name: 'Show password' })[0];
+    await userEvent.click(toggle);
+    expect(password).toHaveAttribute('type', 'text');
+    expect(screen.getByRole('button', { name: 'Hide password' })).toHaveAttribute('aria-pressed', 'true');
+    await userEvent.click(screen.getByRole('button', { name: 'Create account' }));
+    expect(await screen.findByRole('link', { name: 'Passwords do not match' })).toHaveAttribute(
+      'href',
+      '#reg-confirm',
+    );
+    // Local builds have no Google button: it would have nothing real to do.
+    expect(screen.queryByRole('button', { name: 'Continue with Google' })).toBeNull();
+  });
+});
 
 describe('Login (QA-FE-02)', () => {
   const renderLogin = () =>

@@ -249,6 +249,8 @@ def main() -> None:
     parser.add_argument("--reset", action="store_true", help="truncate application tables first (APP_ENV=local only)")
     parser.add_argument("--small", action="store_true", help="about 60 tasks instead of 600 (CI/E2E)")
     args = parser.parse_args()
+    if env("AUTH_PROVIDER", "local") != "local":
+        sys.exit("Demo data needs AUTH_PROVIDER=local: seeded users have local passwords, not Neon Auth accounts")
     admin_email = env("SEED_ADMIN_EMAIL", "admin@demo.local").strip().lower()
     with connect() as conn:
         if args.reset:

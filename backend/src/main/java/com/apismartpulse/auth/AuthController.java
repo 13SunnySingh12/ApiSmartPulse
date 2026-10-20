@@ -12,6 +12,7 @@ import jakarta.validation.constraints.NotBlank;
 import jakarta.validation.constraints.Pattern;
 import jakarta.validation.constraints.Size;
 import java.time.Duration;
+import org.springframework.boot.autoconfigure.condition.ConditionalOnProperty;
 import org.springframework.http.HttpHeaders;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseCookie;
@@ -24,6 +25,10 @@ import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RestController;
 
 @RestController
+@ConditionalOnProperty(
+    name = "app.auth-provider",
+    havingValue = "local",
+    matchIfMissing = true) // with AUTH_PROVIDER=neon, sign-in happens at Neon Auth
 @RequestMapping("/api/v1/auth")
 @Tag(name = "Auth")
 public class AuthController {

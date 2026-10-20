@@ -3,7 +3,7 @@ import { createBrowserRouter, Navigate, Outlet, RouterProvider, useLocation } fr
 import { useAuth } from './auth/AuthProvider.jsx';
 import { AppShell } from './components/layout/AppShell.jsx';
 import { SkeletonCards } from './components/ui/Feedback.jsx';
-import { LoginPage, RegisterPage } from './features/auth/AuthPages.jsx';
+import { AuthCallbackPage, LoginPage, RegisterPage } from './features/auth/AuthPages.jsx';
 import { ProjectsPage } from './features/projects/ProjectsPage.jsx';
 import { ProjectLayout } from './features/projects/ProjectLayout.jsx';
 import { BoardPage } from './features/board/BoardPage.jsx';
@@ -52,6 +52,7 @@ function BootScreen() {
 }
 
 const router = createBrowserRouter([
+  { path: '/auth/callback', element: <AuthCallbackPage /> },
   {
     element: <PublicOnly />,
     children: [

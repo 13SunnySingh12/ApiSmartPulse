@@ -2,8 +2,11 @@ package com.apismartpulse.config;
 
 import com.apismartpulse.apikey.ApiKeyAuthFilter;
 import com.apismartpulse.apikey.ApiKeyService;
+import com.apismartpulse.auth.NeonIdentityConverter;
+import com.apismartpulse.auth.NeonJwtDecoder;
 import com.apismartpulse.common.Problems;
 import com.apismartpulse.ratelimit.RateLimiters;
+import com.apismartpulse.user.UserRepository;
 import com.nimbusds.jose.jwk.source.ImmutableSecret;
 import java.nio.charset.StandardCharsets;
 import java.time.Clock;
@@ -14,7 +17,10 @@ import javax.crypto.spec.SecretKeySpec;
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
 import org.springframework.core.annotation.Order;
+import org.springframework.core.convert.converter.Converter;
 import org.springframework.http.HttpStatus;
+import org.springframework.security.authentication.AbstractAuthenticationToken;
+import org.springframework.security.authentication.DisabledException;
 import org.springframework.security.config.annotation.method.configuration.EnableMethodSecurity;
 import org.springframework.security.config.annotation.web.builders.HttpSecurity;
 import org.springframework.security.config.http.SessionCreationPolicy;
@@ -23,6 +29,7 @@ import org.springframework.security.crypto.bcrypt.BCryptPasswordEncoder;
 import org.springframework.security.crypto.password.PasswordEncoder;
 import org.springframework.security.oauth2.core.DelegatingOAuth2TokenValidator;
 import org.springframework.security.oauth2.jose.jws.MacAlgorithm;
+import org.springframework.security.oauth2.jwt.Jwt;
 import org.springframework.security.oauth2.jwt.JwtDecoder;
 import org.springframework.security.oauth2.jwt.JwtEncoder;
 import org.springframework.security.oauth2.jwt.JwtIssuerValidator;
@@ -35,6 +42,7 @@ import org.springframework.security.oauth2.server.resource.web.DefaultBearerToke
 import org.springframework.security.web.SecurityFilterChain;
 import org.springframework.security.web.authentication.AnonymousAuthenticationFilter;
 import org.springframework.security.web.header.writers.ReferrerPolicyHeaderWriter.ReferrerPolicy;
+import org.springframework.transaction.support.TransactionTemplate;
 import org.springframework.web.cors.CorsConfiguration;
 import org.springframework.web.cors.CorsConfigurationSource;
 import org.springframework.web.cors.UrlBasedCorsConfigurationSource;
@@ -73,6 +81,7 @@ public class SecurityConfig {
 
   @Bean
   JwtDecoder jwtDecoder(AppProperties props, Clock clock) {
+    if (props.neonAuth()) return new NeonJwtDecoder(props.neonAuthUrl(), clock);
     NimbusJwtDecoder decoder =
         NimbusJwtDecoder.withSecretKey(key(props)).macAlgorithm(MacAlgorithm.HS256).build();
     JwtTimestampValidator timestamps = new JwtTimestampValidator(Duration.ofSeconds(30));
@@ -110,10 +119,14 @@ public class SecurityConfig {
 
   @Bean
   @Order(2)
-  SecurityFilterChain appApi(HttpSecurity http) throws Exception {
-    JwtAuthenticationConverter converter = new JwtAuthenticationConverter();
-    converter.setJwtGrantedAuthoritiesConverter(
+  SecurityFilterChain appApi(
+      HttpSecurity http, AppProperties props, UserRepository users, TransactionTemplate tx)
+      throws Exception {
+    JwtAuthenticationConverter local = new JwtAuthenticationConverter();
+    local.setJwtGrantedAuthoritiesConverter(
         jwt -> List.of(new SimpleGrantedAuthority("ROLE_" + jwt.getClaimAsString("role"))));
+    Converter<Jwt, ? extends AbstractAuthenticationToken> converter =
+        props.neonAuth() ? new NeonIdentityConverter(users, tx) : local;
     DefaultBearerTokenResolver bearer = new DefaultBearerTokenResolver();
     // Auth endpoints must work even if the browser still holds an expired access token.
     BearerTokenResolver resolver =
@@ -144,15 +157,7 @@ public class SecurityConfig {
             o ->
                 o.bearerTokenResolver(resolver)
                     .jwt(j -> j.jwtAuthenticationConverter(converter))
-                    .authenticationEntryPoint(
-                        (req, res, ex) ->
-                            Problems.write(
-                                req,
-                                res,
-                                HttpStatus.UNAUTHORIZED,
-                                "UNAUTHENTICATED",
-                                "Authentication required",
-                                "Log in to continue.")))
+                    .authenticationEntryPoint(SecurityConfig::bearerRejected))
         .exceptionHandling(
             e ->
                 e.authenticationEntryPoint(
@@ -175,6 +180,35 @@ public class SecurityConfig {
                                 "You don't have permission to do that.")))
         .headers(SecurityConfig::headers);
     return http.build();
+  }
+
+  /** 401 for missing/invalid tokens; deactivated or conflicting identities get a precise answer. */
+  private static void bearerRejected(
+      jakarta.servlet.http.HttpServletRequest req,
+      jakarta.servlet.http.HttpServletResponse res,
+      org.springframework.security.core.AuthenticationException ex)
+      throws java.io.IOException {
+    if (ex instanceof DisabledException) {
+      Problems.write(
+          req,
+          res,
+          HttpStatus.FORBIDDEN,
+          "ACCOUNT_DISABLED",
+          "Account deactivated",
+          ex.getMessage());
+    } else if (ex instanceof NeonIdentityConverter.IdentityRejected r
+        && "ACCOUNT_LINK_CONFLICT".equals(r.code)) {
+      Problems.write(
+          req, res, HttpStatus.CONFLICT, r.code, "Account already exists", ex.getMessage());
+    } else {
+      Problems.write(
+          req,
+          res,
+          HttpStatus.UNAUTHORIZED,
+          "UNAUTHENTICATED",
+          "Authentication required",
+          "Log in to continue.");
+    }
   }
 
   private static void headers(

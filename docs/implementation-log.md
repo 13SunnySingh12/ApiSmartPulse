@@ -80,6 +80,29 @@ both themes with no horizontal overflow and no console errors except the expecte
 anonymous session-refresh probe, Impeccable detector 0 findings. Contrast measured from token values
 (not estimated): lowest pair 5.0:1 (dark muted text on grey chip).
 
+## Neon database and Neon Auth (2026-10-20)
+
+Neon project `icy-water-20603497`, branch `production` (`br-lingering-thunder-ao88uc2d`), Postgres 18,
+verified via the Neon MCP. Neon Auth (managed Better Auth) was already provisioned: email/password on,
+Google on with Neon's shared credentials, localhost allowed, email verification off, no users.
+
+- Database: roles `asp_owner/asp_app/asp_ai` created by SQL (not `neon_superuser`, no CREATEROLE/
+  CREATEDB/BYPASSRLS), pgvector 0.8.6, `public` owned by `asp_owner`. Flyway V1–V4 applied by the
+  backend on first start (17 tables, 50 indexes). Checked on Neon: `ck_users_credential` rejects a
+  user with neither password nor identity; app roles cannot read `neon_auth`, cannot create tables;
+  `asp_ai` cannot read emails or API keys; `asp_app` cannot delete task history.
+- Runtime: backend (Hikari, pgjdbc `verify-full` with the JDK trust store) and AI service (psycopg
+  pool, `verify-full` with Debian's CA bundle) connect to the direct endpoint; both healthy.
+- Auth: `AUTH_PROVIDER=neon` verifies Neon Auth JWTs (EdDSA via the JDK, JWKS cached by Nimbus) and
+  maps them to app users (`users.auth_user_id`, V4). `NeonAuthIT` (6 tests) covers provisioning,
+  forged/expired/foreign-issuer/foreign-audience/unknown-key/local HS256 tokens, the disabled built-in
+  login, deactivation (403), email linking only when verified (409 otherwise) and cross-user isolation.
+- UI: login/signup with show/hide password, confirm password, "Continue with Google" (neon builds
+  only), `/auth/callback` with same-origin `next` only. Browser check against the Neon stack: Google
+  button reached `accounts.google.com` with `state` and Neon's callback as `redirect_uri`; no console
+  errors; no overflow at 375 px. Not done by the agent: creating accounts or signing in at Neon Auth or
+  Google (left to the owner, see README).
+
 ## Known gaps
 
 - QA-PERF-01 and QA-RAG-EVAL are manual by design and have not been run.

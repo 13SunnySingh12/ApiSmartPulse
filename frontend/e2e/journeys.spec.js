@@ -20,7 +20,8 @@ test('QA-E2E-01 register, empty state, promotion, project and member', async ({ 
   await page.goto('/register');
   await page.getByLabel('Name').fill('Edge Case');
   await page.getByLabel('Email').fill(email);
-  await page.getByLabel('Password').fill('E2e-registration-2026');
+  await page.getByLabel('Password', { exact: true }).fill('E2e-registration-2026');
+  await page.getByLabel('Confirm password').fill('E2e-registration-2026');
   await page.getByRole('button', { name: 'Create account' }).click();
   await expect(page.getByText("You're not in any projects yet. Ask a manager to add you.")).toBeVisible();
 

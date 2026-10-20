@@ -1,14 +1,15 @@
 import { useRef, useState } from 'react';
-import { Link, useLocation, useNavigate } from 'react-router';
-import { AlertCircle } from 'lucide-react';
+import { Link, Navigate, useLocation, useNavigate, useSearchParams } from 'react-router';
+import { AlertCircle, Eye, EyeOff } from 'lucide-react';
 import { problem } from '../../api/client.js';
 import { useAuth } from '../../auth/AuthProvider.jsx';
-import { Button } from '../../components/ui/Button.jsx';
+import { Button, IconButton } from '../../components/ui/Button.jsx';
 import { Notice } from '../../components/ui/Feedback.jsx';
 import { Field, Input, fieldErrors } from '../../components/ui/Field.jsx';
 import { Logo } from '../../components/layout/Logo.jsx';
 import { ThemeToggle } from '../../components/layout/AppShell.jsx';
 import { useDocumentTitle } from '../../hooks/misc.js';
+import { NEON_AUTH, safeNext } from '../../auth/neonAuth.js';
 
 const EMAIL = /^[^@\s]+@[^@\s]+\.[^@\s]+$/;
 
@@ -58,6 +59,64 @@ function ErrorSummary({ summaryRef, message, fields }) {
   );
 }
 
+/** Password field with a show/hide toggle; the toggle is a real button with a state label. */
+function PasswordInput(props) {
+  const [shown, setShown] = useState(false);
+  return (
+    <div className="password-input">
+      <Input {...props} type={shown ? 'text' : 'password'} />
+      <IconButton
+        size="sm"
+        variant="ghost"
+        label={shown ? 'Hide password' : 'Show password'}
+        aria-pressed={shown}
+        offlineOk
+        onClick={() => setShown(!shown)}
+      >
+        {shown ? <EyeOff /> : <Eye />}
+      </IconButton>
+    </div>
+  );
+}
+
+/** Monochrome "G" mark: the UI is black-and-white only, so Google's colour logo is not used. */
+function GoogleMark() {
+  return (
+    <svg viewBox="0 0 24 24" aria-hidden="true" width="18" height="18">
+      <path
+        fill="currentColor"
+        d="M21.6 12.23c0-.68-.06-1.36-.18-2.02H12v3.83h5.39a4.6 4.6 0 0 1-2 3.02v2.5h3.23c1.9-1.75 2.98-4.32 2.98-7.33ZM12 22c2.7 0 4.96-.9 6.62-2.43l-3.23-2.5c-.9.6-2.04.95-3.39.95-2.6 0-4.81-1.76-5.6-4.12H3.07v2.58A10 10 0 0 0 12 22Zm-5.6-8.1a6 6 0 0 1 0-3.8V7.52H3.07a10 10 0 0 0 0 8.96L6.4 13.9ZM12 5.98c1.47 0 2.79.5 3.83 1.5l2.86-2.86A9.6 9.6 0 0 0 12 2a10 10 0 0 0-8.93 5.52L6.4 10.1C7.19 7.74 9.4 5.98 12 5.98Z"
+      />
+    </svg>
+  );
+}
+
+/** Neon Auth builds only: Google sign-in/sign-up (a new Google user gets an account). */
+function GoogleSignIn({ next }) {
+  const { loginWithGoogle } = useAuth();
+  const [state, setState] = useState({ busy: false, error: null });
+  if (!NEON_AUTH) return null;
+  const start = async () => {
+    setState({ busy: true, error: null });
+    try {
+      await loginWithGoogle(next); // on success the browser leaves for Google
+    } catch (err) {
+      setState({ busy: false, error: problem(err).detail });
+    }
+  };
+  return (
+    <div className="stack auth__social">
+      <div className="auth__divider" role="separator">
+        <span>or</span>
+      </div>
+      {state.error && <Notice kind="error">{state.error}</Notice>}
+      <Button block icon={<GoogleMark />} loading={state.busy} onClick={start}>
+        Continue with Google
+      </Button>
+    </div>
+  );
+}
+
 function useAuthForm(validate, submit) {
   const [errors, setErrors] = useState({});
   const [message, setMessage] = useState(null);
@@ -97,6 +156,9 @@ export function LoginPage() {
   const { login } = useAuth();
   const navigate = useNavigate();
   const location = useLocation();
+  const [params] = useSearchParams();
+  const next = safeNext(location.state?.from || params.get('next'));
+  const oauthFailed = params.get('oauth') === 'failed' || params.has('error');
   const [values, setValues] = useState({ email: '', password: '' });
   const form = useAuthForm(
     (v) => ({
@@ -105,7 +167,7 @@ export function LoginPage() {
     }),
     async (v) => {
       await login({ email: v.email.trim(), password: v.password });
-      navigate(location.state?.from || '/projects', { replace: true });
+      navigate(next, { replace: true });
     },
   );
   const set = (k) => (e) => setValues({ ...values, [k]: e.target.value });
@@ -113,6 +175,11 @@ export function LoginPage() {
   return (
     <AuthCard title="Log in" subtitle="Welcome back. Use your work email.">
       <form className="stack auth__form" noValidate onSubmit={(e) => form.onSubmit(e, values)}>
+        {oauthFailed && !form.message && (
+          <Notice kind="error" title="Google sign-in didn't complete">
+            It was cancelled or refused. Try again, or log in with your email.
+          </Notice>
+        )}
         {form.locked ? (
           <Notice kind="warning" title="Account temporarily locked">
             Too many failed attempts. Try again in about {Math.ceil(form.locked / 60)} minutes.
@@ -131,9 +198,8 @@ export function LoginPage() {
         </Field>
         <Field id="login-password" label="Password" error={form.errors.password}>
           {(p) => (
-            <Input
+            <PasswordInput
               {...p}
-              type="password"
               autoComplete="current-password"
               value={values.password}
               onChange={set('password')}
@@ -144,6 +210,7 @@ export function LoginPage() {
           Log in
         </Button>
       </form>
+      <GoogleSignIn next={next} />
       <p className="small auth__switch">
         New here? <Link to="/register">Create an account</Link>
       </p>
@@ -155,7 +222,7 @@ export function RegisterPage() {
   useDocumentTitle('Create account');
   const { register } = useAuth();
   const navigate = useNavigate();
-  const [values, setValues] = useState({ name: '', email: '', password: '' });
+  const [values, setValues] = useState({ name: '', email: '', password: '', confirm: '' });
   const form = useAuthForm(
     (v) => ({
       ...(v.name.trim() && v.name.trim().length <= 80
@@ -165,6 +232,7 @@ export function RegisterPage() {
       ...(v.password.length >= 10 && /[a-z]/i.test(v.password) && /\d/.test(v.password)
         ? {}
         : { password: 'Use 10–128 characters with at least one letter and one digit' }),
+      ...(v.confirm === v.password ? {} : { confirm: 'Passwords do not match' }),
     }),
     async (v) => {
       await register({ name: v.name.trim(), email: v.email.trim(), password: v.password });
@@ -196,15 +264,30 @@ export function RegisterPage() {
           id="reg-password"
           label="Password"
           error={form.errors.password}
-          help="At least 10 characters, with a letter and a digit. Common passwords are rejected."
+          help={
+            NEON_AUTH
+              ? 'At least 10 characters, with a letter and a digit.'
+              : 'At least 10 characters, with a letter and a digit. Common passwords are rejected.'
+          }
         >
           {(p) => (
-            <Input
+            <PasswordInput
               {...p}
-              type="password"
               autoComplete="new-password"
+              maxLength={128}
               value={values.password}
               onChange={set('password')}
+            />
+          )}
+        </Field>
+        <Field id="reg-confirm" label="Confirm password" error={form.errors.confirm}>
+          {(p) => (
+            <PasswordInput
+              {...p}
+              autoComplete="new-password"
+              maxLength={128}
+              value={values.confirm}
+              onChange={set('confirm')}
             />
           )}
         </Field>
@@ -212,9 +295,25 @@ export function RegisterPage() {
           Create account
         </Button>
       </form>
+      <GoogleSignIn next="/projects" />
       <p className="small auth__switch">
         Already have an account? <Link to="/login">Log in</Link>
       </p>
     </AuthCard>
+  );
+}
+
+/** Neon Auth returns here after Google; AuthProvider restores the session on load. */
+export function AuthCallbackPage() {
+  useDocumentTitle('Signing in');
+  const { status } = useAuth();
+  const [params] = useSearchParams();
+  if (status === 'signedIn') return <Navigate to={safeNext(params.get('next'))} replace />;
+  if (status === 'signedOut') return <Navigate to="/login?oauth=failed" replace />;
+  return (
+    <div className="boot" role="status" aria-live="polite">
+      <span className="spinner" aria-hidden="true" />
+      <span className="visually-hidden">Finishing sign-in…</span>
+    </div>
   );
 }

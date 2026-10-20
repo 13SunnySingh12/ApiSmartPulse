@@ -1,0 +1,19 @@
+# Run the local stack against a Neon branch with Neon Auth sign-in (no local Postgres container).
+# Prepare once: scripts/make-neon-env.sh > .env.neon, then create the roles (scripts/neon-roles-sql.py).
+#   docker compose -f docker-compose.yml -f docker-compose.neon.yml --env-file .env --env-file .env.neon up -d --build
+services:
+  db:
+    profiles: ["local-db"] # not started: the database is Neon
+  backend:
+    env_file: [.env, .env.neon]
+    depends_on: !reset {}
+  ai-service:
+    env_file: [.env, .env.neon]
+  frontend:
+    build:
+      args:
+        VITE_AUTH_PROVIDER: neon
+        VITE_NEON_AUTH_URL: ${VITE_NEON_AUTH_URL:?set VITE_NEON_AUTH_URL in .env.neon}
+        NEON_AUTH_ORIGIN: ${NEON_AUTH_ORIGIN:?set NEON_AUTH_ORIGIN in .env.neon}
+  seed:
+    env_file: [.env, .env.neon] # refuses to run: demo users can't sign in through Neon Auth

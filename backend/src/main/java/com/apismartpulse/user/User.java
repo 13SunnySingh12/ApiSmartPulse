@@ -11,6 +11,7 @@ import jakarta.persistence.PrePersist;
 import jakarta.persistence.PreUpdate;
 import jakarta.persistence.Table;
 import java.time.Instant;
+import java.util.UUID;
 
 @Entity
 @Table(name = "users")
@@ -23,7 +24,10 @@ public class User {
   private String name;
 
   @Column(name = "password_hash")
-  private String passwordHash;
+  private String passwordHash; // null for Neon Auth identities
+
+  @Column(name = "auth_user_id")
+  private UUID authUserId;
 
   @Enumerated(EnumType.STRING)
   private Role role = Role.MEMBER;
@@ -85,6 +89,14 @@ public class User {
 
   public void setPasswordHash(String passwordHash) {
     this.passwordHash = passwordHash;
+  }
+
+  public UUID getAuthUserId() {
+    return authUserId;
+  }
+
+  public void setAuthUserId(UUID authUserId) {
+    this.authUserId = authUserId;
   }
 
   public Role getRole() {

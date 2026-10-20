@@ -9,6 +9,8 @@ export const API_BASE_URL = import.meta.env.VITE_API_BASE_URL || 'http://localho
 let accessToken = null;
 let onSessionLost = () => {};
 let refreshInFlight = null;
+// Local mode rotates the refresh cookie; Neon Auth mode swaps in a JWT fetch (setSessionRefresher).
+let refresher = () => http.post('/auth/refresh').then((r) => r.data);
 
 export function setAccessToken(token) {
   accessToken = token;
@@ -16,6 +18,10 @@ export function setAccessToken(token) {
 
 export function setSessionLostHandler(fn) {
   onSessionLost = fn;
+}
+
+export function setSessionRefresher(fn) {
+  refresher = fn;
 }
 
 export const http = axios.create({
@@ -41,11 +47,10 @@ http.interceptors.request.use((config) => {
  */
 export function refreshSession() {
   if (!refreshInFlight) {
-    refreshInFlight = http
-      .post('/auth/refresh')
-      .then((r) => {
-        accessToken = r.data.accessToken;
-        return r.data;
+    refreshInFlight = refresher()
+      .then((session) => {
+        accessToken = session.accessToken;
+        return session;
       })
       .finally(() => {
         refreshInFlight = null;
@@ -75,6 +80,7 @@ http.interceptors.response.use(
 
 /** Normalises any failure into the problem+json shape (§7.3) the UI renders. */
 export function problem(error) {
+  if (error?.problem) return error.problem; // already normalised (Neon Auth SDK errors)
   const data = error?.response?.data;
   if (data && typeof data === 'object' && data.code) {
     return {

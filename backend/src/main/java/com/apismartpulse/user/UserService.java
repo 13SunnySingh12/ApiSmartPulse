@@ -5,6 +5,7 @@ import com.apismartpulse.auth.PasswordPolicy;
 import com.apismartpulse.common.ApiException;
 import com.apismartpulse.user.UserDtos.AdminUserUpdate;
 import java.util.List;
+import org.springframework.http.HttpStatus;
 import org.springframework.security.crypto.password.PasswordEncoder;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
@@ -39,6 +40,13 @@ public class UserService {
   @Transactional
   public void changePassword(long id, String current, String next) {
     User u = get(id);
+    if (u.getPasswordHash() == null) {
+      throw new ApiException(
+          HttpStatus.CONFLICT,
+          "PASSWORD_MANAGED_EXTERNALLY",
+          "Password managed by sign-in provider",
+          "Change your password through your sign-in provider.");
+    }
     if (!encoder.matches(current, u.getPasswordHash())) {
       throw ApiException.validation("currentPassword", "is incorrect");
     }
