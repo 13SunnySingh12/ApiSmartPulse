@@ -1,5 +1,5 @@
 # Local/CI image only — never pushed to a registry.
-FROM python:3.12-slim
+FROM python:3.14-slim
 ARG INSTALL_ML_EXTRAS=true
 ENV PYTHONDONTWRITEBYTECODE=1 PYTHONUNBUFFERED=1 PIP_NO_CACHE_DIR=1 PIP_DISABLE_PIP_VERSION_CHECK=1 \
     HF_HOME=/cache/hf MODELS_DIR=/models
