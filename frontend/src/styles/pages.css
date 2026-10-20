@@ -522,7 +522,10 @@
 
 .due--overdue {
   color: var(--error-fg);
-  font-weight: 600;
+  font-weight: 700;
+  text-decoration: underline;
+  text-decoration-thickness: 2px;
+  text-underline-offset: 3px;
 }
 
 /* ── task detail (P-05) ────────────────────────────────────────────────────── */
@@ -669,6 +672,7 @@
   border-radius: var(--radius-lg);
   background: var(--warning-bg);
   color: var(--warning-fg);
+  box-shadow: var(--outline-strong);
 }
 
 .dup svg {

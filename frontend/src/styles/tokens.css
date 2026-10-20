@@ -3,45 +3,41 @@
 :root {
   color-scheme: light;
 
-  /* colour */
-  --bg-base: #eef0fb;
-  --bg-blob-1: #c9c2ff;
-  --bg-blob-2: #a7f0e4;
-  --bg-blob-3: #ffd3c4;
-  --glass-fill: rgb(255 255 255 / 62%);
-  --glass-strong-fill: rgb(255 255 255 / 78%);
-  --glass-border: rgb(255 255 255 / 75%);
-  --glass-edge: rgb(26 29 46 / 8%);
-  --glass-fallback: #f7f7fd;
-  --clay-surface: #f6f5ff;
-  --text-1: #1a1d2e;
-  --text-2: #454b63;
-  --text-muted: #5a6079;
-  --primary: #5b4be0;
-  --primary-text: #4a3bd0;
+  /* colour — monochrome (black, white and neutral greys only; meaning comes from text, icons,
+     weight and borders, never hue). Palette names: Ink #000, Obsidian #111, Charcoal #1C1C1C,
+     Graphite #292929, Slate #404040, Mid #666, Gray #808080, Silver #B3B3B3, Mist #D9D9D9,
+     Cloud #EAEAEA, Off White #F5F5F5, Paper #FAFAFA, White #FFF. */
+  --bg-base: #f5f5f5;
+  --bg-blob-1: #e2e2e2;
+  --bg-blob-2: #fff;
+  --bg-blob-3: #eaeaea;
+  --glass-fill: rgb(255 255 255 / 68%);
+  --glass-strong-fill: rgb(255 255 255 / 84%);
+  --glass-border: rgb(255 255 255 / 80%);
+  --glass-edge: rgb(0 0 0 / 9%);
+  --glass-fallback: #fafafa;
+  --clay-surface: #fafafa;
+  --text-1: #111;
+  --text-2: #404040;
+  --text-muted: #5c5c5c;
+  --primary: #111;
+  --primary-text: #111;
   --on-primary: #fff;
-  --danger: #c2283a;
+  --danger: #111;
   --on-danger: #fff;
-  --success-fg: #0b6b52;
-  --success-bg: #ddf6ee;
-  --warning-fg: #8a5200;
-  --warning-bg: #fff1d6;
-  --error-fg: #9f1d2c;
-  --error-bg: #fde3e5;
-  --scrim: rgb(26 29 46 / 40%);
-  --chart-2: #0f8c79;
-  --hover-tint: color-mix(in srgb, var(--primary) 6%, transparent);
-  --primary-tint: color-mix(in srgb, var(--primary) 12%, var(--clay-surface));
-
-  /* label palette (§4.3.4) — dots only, never text */
-  --label-slate: #64748b;
-  --label-violet: #7c6cf0;
-  --label-blue: #3b82f6;
-  --label-teal: #14b8a6;
-  --label-green: #22c55e;
-  --label-amber: #f59e0b;
-  --label-orange: #f97316;
-  --label-rose: #f43f5e;
+  /* status: error = inverted ink, warning = outlined, success = quiet grey (DS-022) */
+  --error-fg: #000;
+  --error-bg: #111;
+  --on-error: #fff;
+  --warning-fg: #1c1c1c;
+  --warning-bg: #fff;
+  --success-fg: #404040;
+  --success-bg: #eaeaea;
+  --scrim: rgb(0 0 0 / 45%);
+  --chart-2: #808080;
+  --marker: #404040;
+  --hover-tint: rgb(0 0 0 / 5%);
+  --primary-tint: #eaeaea;
 
   /* typography (§4.4) */
   --font-sans: 'Plus Jakarta Sans', system-ui, -apple-system, 'Segoe UI', sans-serif;
@@ -73,10 +69,12 @@
   --sidebar-w: 248px;
   --sidebar-w-collapsed: 72px;
   --detail-panel-w: 480px;
+  --form-max-w: 880px;
   --topbar-h: 64px;
   --tabbar-h: 56px;
 
   /* radii */
+  --radius-xs: 2px;
   --radius-sm: 10px;
   --radius-md: 14px;
   --radius-lg: 18px;
@@ -93,16 +91,16 @@
   --border-glass: 1px solid var(--glass-border);
 
   /* elevation */
-  --shadow-glass-1: 0 8px 32px rgb(31 38 80 / 10%);
-  --shadow-glass-2: 0 16px 48px rgb(31 38 80 / 18%);
+  --shadow-glass-1: 0 8px 32px rgb(0 0 0 / 8%);
+  --shadow-glass-2: 0 16px 48px rgb(0 0 0 / 16%);
   --clay-raised:
-    6px 6px 14px rgb(91 75 224 / 16%), -4px -4px 10px rgb(255 255 255 / 90%),
-    inset 1px 1px 2px rgb(255 255 255 / 80%), inset -2px -2px 4px rgb(91 75 224 / 8%);
+    6px 6px 14px rgb(0 0 0 / 10%), -4px -4px 10px rgb(255 255 255 / 90%),
+    inset 1px 1px 2px rgb(255 255 255 / 80%), inset -2px -2px 4px rgb(0 0 0 / 5%);
   --clay-hover:
-    8px 10px 20px rgb(91 75 224 / 20%), -4px -4px 12px rgb(255 255 255 / 95%),
-    inset 1px 1px 2px rgb(255 255 255 / 80%), inset -2px -2px 4px rgb(91 75 224 / 8%);
-  --clay-inset: inset 3px 3px 6px rgb(91 75 224 / 14%), inset -3px -3px 6px rgb(255 255 255 / 85%);
-  --clay-flat: 0 1px 2px rgb(31 38 80 / 8%);
+    8px 10px 20px rgb(0 0 0 / 14%), -4px -4px 12px rgb(255 255 255 / 95%),
+    inset 1px 1px 2px rgb(255 255 255 / 80%), inset -2px -2px 4px rgb(0 0 0 / 5%);
+  --clay-inset: inset 3px 3px 6px rgb(0 0 0 / 10%), inset -3px -3px 6px rgb(255 255 255 / 85%);
+  --clay-flat: 0 1px 2px rgb(0 0 0 / 8%);
 
   /* motion */
   --ease: cubic-bezier(0.2, 0.8, 0.2, 1);
@@ -128,7 +126,10 @@
   --accent-danger-edge: inset 3px 0 0 var(--danger), var(--shadow-glass-1);
   --drop-target: inset 0 0 0 2px var(--primary), var(--shadow-glass-1);
   --avatar-ring: 0 0 0 2px var(--clay-surface);
-  --primary-hover: color-mix(in srgb, var(--primary) 94%, white);
+  --outline-strong: inset 0 0 0 1.5px var(--text-1);
+  --marker-ring: inset 0 0 0 2px var(--marker);
+  --stripes: repeating-linear-gradient(-45deg, var(--text-1) 0 4px, var(--text-muted) 4px 8px);
+  --primary-hover: #333;
   --skeleton-fill:
     linear-gradient(100deg, transparent 30%, var(--glass-border) 50%, transparent 70%) 0 0 / 200% 100%,
     var(--clay-surface);

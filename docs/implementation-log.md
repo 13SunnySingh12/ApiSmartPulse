@@ -70,6 +70,16 @@ Remaining P2/P3 notes, not fixed:
 - P3 Motion: `prefers-reduced-motion` shortens every transition to 1 ms globally. State changes stay
   visible, but there is no tailored alternative per component.
 
+## Monochrome redesign (2026-10-20)
+
+Owner request: black, white and greys only. Tokens rewritten for both themes; meaning moved from hue to
+inversion, outline, weight, pattern, text and icons. Evidence: ESLint 0 errors, Stylelint clean,
+Vitest 19/19, production build ok, bundle secret check clean, Playwright 10/10 with axe 0 serious or
+critical issues on 10 pages in light and dark, screenshot sweep of 11 pages at 375/768/1440/1680 px in
+both themes with no horizontal overflow and no console errors except the expected 401 from the
+anonymous session-refresh probe, Impeccable detector 0 findings. Contrast measured from token values
+(not estimated): lowest pair 5.0:1 (dark muted text on grey chip).
+
 ## Known gaps
 
 - QA-PERF-01 and QA-RAG-EVAL are manual by design and have not been run.

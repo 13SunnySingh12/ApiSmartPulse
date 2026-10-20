@@ -188,6 +188,7 @@
   border-radius: var(--radius-lg);
   background: var(--warning-bg);
   color: var(--warning-fg);
+  box-shadow: var(--outline-strong);
   font-weight: 600;
 }
 
@@ -358,6 +359,7 @@
   display: grid;
   grid-template-columns: repeat(2, minmax(0, 1fr));
   gap: var(--space-4);
+  max-width: var(--form-max-w); /* fields stay a readable width on wide screens */
 }
 
 .grid-form .span-2 {

@@ -175,6 +175,7 @@ function Burndown({ projectKey }) {
                   <Legend wrapperStyle={{ fontSize: 13, color: 'var(--text-2)' }} />
                   <Line
                     name="Remaining"
+                    legendType="plainline"
                     type="linear"
                     dataKey="remainingHours"
                     stroke="var(--primary)"
@@ -185,6 +186,7 @@ function Burndown({ projectKey }) {
                   />
                   <Line
                     name="Ideal"
+                    legendType="plainline"
                     type="linear"
                     dataKey="idealHours"
                     stroke="var(--text-muted)"

@@ -12,7 +12,17 @@ import { useToast } from '../../components/ui/Toast.jsx';
 import { useDocumentTitle } from '../../hooks/misc.js';
 import { useProject } from '../projects/ProjectLayout.jsx';
 
-const COLORS = ['slate', 'violet', 'blue', 'teal', 'green', 'amber', 'orange', 'rose'];
+// The API stores palette names; the monochrome UI shows each as a distinct marker shape.
+const MARKERS = {
+  slate: 'Circle',
+  violet: 'Square',
+  blue: 'Triangle',
+  teal: 'Diamond',
+  green: 'Ring',
+  amber: 'Outlined square',
+  orange: 'Plus',
+  rose: 'Hexagon',
+};
 
 export default function SettingsPage() {
   const project = useProject();
@@ -424,12 +434,12 @@ function LabelFields({ value, onChange, idPrefix }) {
           />
         )}
       </Field>
-      <Field id={`${idPrefix}-color`} label="Colour">
+      <Field id={`${idPrefix}-color`} label="Marker">
         {(p) => (
           <Select {...p} value={value.color} onChange={(e) => onChange({ ...value, color: e.target.value })}>
-            {COLORS.map((c) => (
+            {Object.entries(MARKERS).map(([c, name]) => (
               <option key={c} value={c}>
-                {c}
+                {name}
               </option>
             ))}
           </Select>

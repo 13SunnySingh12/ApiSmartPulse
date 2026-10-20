@@ -6,6 +6,8 @@ export default defineConfig({
   server: { port: 5173 },
   build: {
     sourcemap: false,
+    // No data: URIs: the CSP allows fonts and images from 'self' only.
+    assetsInlineLimit: 0,
     rollupOptions: {
       output: {
         manualChunks(id) {

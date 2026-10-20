@@ -1,5 +1,6 @@
 import { useRef, useState } from 'react';
 import { Link, useLocation, useNavigate } from 'react-router';
+import { AlertCircle } from 'lucide-react';
 import { problem } from '../../api/client.js';
 import { useAuth } from '../../auth/AuthProvider.jsx';
 import { Button } from '../../components/ui/Button.jsx';
@@ -40,6 +41,7 @@ function ErrorSummary({ summaryRef, message, fields }) {
   if (!message && !fields.length) return null;
   return (
     <div ref={summaryRef} tabIndex={-1} className="notice notice--error" role="alert">
+      <AlertCircle className="notice__icon" aria-hidden="true" />
       <div className="notice__body">
         <strong>{message || 'Please fix the highlighted fields.'}</strong>
         {fields.length > 0 && (

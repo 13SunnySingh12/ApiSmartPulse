@@ -1,5 +1,5 @@
 import * as RD from '@radix-ui/react-dialog';
-import { X } from 'lucide-react';
+import { AlertTriangle, X } from 'lucide-react';
 import { Button, IconButton } from './Button.jsx';
 
 /**
@@ -51,7 +51,12 @@ export function ConfirmDialog({
         <Button onClick={() => onOpenChange(false)} disabled={busy} offlineOk>
           Cancel
         </Button>
-        <Button variant={danger ? 'danger' : 'primary'} onClick={onConfirm} loading={busy}>
+        <Button
+          variant={danger ? 'danger' : 'primary'}
+          icon={danger ? <AlertTriangle /> : undefined}
+          onClick={onConfirm}
+          loading={busy}
+        >
           {confirmLabel}
         </Button>
       </div>

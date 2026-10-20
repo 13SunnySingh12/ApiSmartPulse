@@ -58,6 +58,7 @@
 .btn--danger {
   background: var(--danger);
   color: var(--on-danger);
+  font-weight: 700;
 }
 
 .btn--ghost {
@@ -262,12 +263,14 @@ select.input {
 
 .chip--high {
   background: var(--error-bg);
-  color: var(--error-fg);
+  color: var(--on-error);
+  font-weight: 700;
 }
 
 .chip--medium {
   background: var(--warning-bg);
   color: var(--warning-fg);
+  box-shadow: var(--outline-strong);
 }
 
 .chip--low,
@@ -293,39 +296,57 @@ select.input {
   width: 10px;
   height: 10px;
   border-radius: var(--radius-pill);
+  background: var(--marker);
   flex: none;
 }
 
-.dot--slate {
-  background: var(--label-slate);
-}
-
+/* Label "colours" render as distinct monochrome marker shapes (the API keeps palette names). */
 .dot--violet {
-  background: var(--label-violet);
+  border-radius: var(--radius-xs);
 }
 
 .dot--blue {
-  background: var(--label-blue);
+  border-radius: 0;
+  clip-path: polygon(50% 0, 100% 100%, 0 100%);
 }
 
 .dot--teal {
-  background: var(--label-teal);
+  border-radius: 0;
+  clip-path: polygon(50% 0, 100% 50%, 50% 100%, 0 50%);
 }
 
 .dot--green {
-  background: var(--label-green);
+  background: transparent;
+  box-shadow: var(--marker-ring);
 }
 
 .dot--amber {
-  background: var(--label-amber);
+  border-radius: var(--radius-xs);
+  background: transparent;
+  box-shadow: var(--marker-ring);
 }
 
 .dot--orange {
-  background: var(--label-orange);
+  border-radius: 0;
+  clip-path: polygon(
+    35% 0,
+    65% 0,
+    65% 35%,
+    100% 35%,
+    100% 65%,
+    65% 65%,
+    65% 100%,
+    35% 100%,
+    35% 65%,
+    0 65%,
+    0 35%,
+    35% 35%
+  );
 }
 
 .dot--rose {
-  background: var(--label-rose);
+  border-radius: 0;
+  clip-path: polygon(25% 0, 75% 0, 100% 50%, 75% 100%, 25% 100%, 0 50%);
 }
 
 .prio--urgent svg {
@@ -419,11 +440,11 @@ select.input {
 }
 
 .bar__fill--over {
-  background: var(--danger);
+  background: var(--stripes);
 }
 
 .bar__fill--under {
-  background: var(--success-fg);
+  background: var(--text-muted);
 }
 
 /* ── Overlays: dialog, drawer, menu, tooltip, toast ────────────────────────── */
@@ -706,12 +727,17 @@ select.input {
 
 .notice--error {
   background: var(--error-bg);
-  color: var(--error-fg);
+  color: var(--on-error);
+}
+
+.notice--error a {
+  color: inherit;
 }
 
 .notice--warning {
   background: var(--warning-bg);
   color: var(--warning-fg);
+  box-shadow: var(--outline-strong);
 }
 
 .notice--success {
