@@ -1,10 +1,10 @@
 # Runtime (no PyTorch). Compile: pip-compile --generate-hashes --allow-unsafe -o requirements.txt requirements.in
-fastapi==0.143.2
+fastapi==0.161.1
 uvicorn==0.54.0
 pydantic==2.14.1
-pydantic-settings==2.16.0
+pydantic-settings==2.16.1
 scikit-learn==1.9.1
-pandas==3.0.6
+pandas==3.1.0
 numpy==2.5.4
 joblib==1.6.0
 psycopg[binary]==3.3.6
